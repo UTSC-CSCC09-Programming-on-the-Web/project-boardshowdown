@@ -51,8 +51,17 @@
                 "input": "public"
               }
             ],
+            "allowedCommonJsDependencies": [
+              "react",
+              "react-dom",
+              "@excalidraw/excalidraw"
+            ],
             "styles": [
               "src/styles.css"
+            ],
+            "scripts": [
+              "node_modules/react/umd/react.development.js",
+              "node_modules/react-dom/umd/react-dom.development.js"
             ]
           },
           "configurations": {

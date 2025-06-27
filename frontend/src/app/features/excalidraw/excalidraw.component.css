@@ -1,0 +1,14 @@
+:host {
+  /* the component wrapper itself fills its parent */
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+}
+
+/* target the div you render React into */
+#excalidraw-host {
+  flex: 1;             /* take up all available space */
+  min-height: 0;       /* allow it to shrink correctly in flex layouts */
+  width: 100%;
+}

@@ -1,1 +1,22 @@
 /* You can add global styles to this file, and also import other style files */
+/* make the page fill the screen, no surprises: */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+}
+
+/* make the Angular root fill too: */
+app-root {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+}
+
+app-excalidraw {
+  flex: 1; /* take up all available space */
+  min-height: 0; /* allow it to shrink correctly in flex layouts */
+  width: 100%;
+}
