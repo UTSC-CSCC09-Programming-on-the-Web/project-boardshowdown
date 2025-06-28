@@ -4,7 +4,7 @@
 </div>
 <!-- This file is part of the Angular application for a collaborative whiteboard. -->
 <div class="flex h-screen work-area">
-  <!-- ◀️  Left toolbar ▶️ -->
+  <!-- Left toolbar -->
   <div class="w-16 bg-gray-800 text-white flex flex-col items-center py-2 space-y-2">
     <button (click)="setTool(ToolType.Pen)"      title="Pen">✏️</button>
     <button (click)="setTool(ToolType.Line)"     title="Line">—</button>
@@ -27,7 +27,7 @@
     </button>
   </div>
 
-  <!-- 🌐  Center whiteboard canvas ▶️ -->
+  <!--Center whiteboard canvas  -->
   <div class="flex-1 bg-white overflow-hidden">
     <ng-whiteboard
       class="w-full h-full"
@@ -55,7 +55,7 @@
     ></ng-whiteboard>
   </div>
 
-  <!-- ▶️  Right settings panel ▶️ -->
+  <!-- Right settings panel -->
   <div class="w-64 bg-gray-100 p-4 space-y-3 overflow-auto">
     <h2 class="font-bold mb-2">Canvas</h2>
     <label>Width:  <input type="number" [(ngModel)]="canvasWidth"/></label>
