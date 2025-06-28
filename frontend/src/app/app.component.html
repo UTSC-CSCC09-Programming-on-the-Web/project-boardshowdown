@@ -1,7 +1,92 @@
-<div class="min-h-screen flex flex-col items-center justify-center bg-gray-100">
-  <h1 class="text-5xl font-bold mb-4">Welcome to BoardShowdown</h1>
-  <p class="text-lg text-gray-700">Your collaborative whiteboard battle arena.</p>
-  <button class="mt-6 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-    Get Started
-  </button>
+<!-- src/app/app.component.html -->
+<div>
+  <h1 class="text-center text-2xl font-bold my-4">Collaborative Whiteboard</h1>
+</div>
+<!-- This file is part of the Angular application for a collaborative whiteboard. -->
+<div class="flex h-screen work-area">
+  <!-- ◀️  Left toolbar ▶️ -->
+  <div class="w-16 bg-gray-800 text-white flex flex-col items-center py-2 space-y-2">
+    <button (click)="setTool(ToolType.Pen)"      title="Pen">✏️</button>
+    <button (click)="setTool(ToolType.Line)"     title="Line">—</button>
+    <button (click)="setTool(ToolType.Rectangle)"title="Rect">▭</button>
+    <button (click)="setTool(ToolType.Ellipse)"  title="Ellipse">◯</button>
+    <button (click)="setTool(ToolType.Text)"     title="Text">T</button>
+    <button (click)="setTool(ToolType.Eraser)"   title="Eraser">🧹</button>
+
+    <hr class="border-gray-600 w-8"/>
+
+    <button (click)="undo()"  title="Undo">↺</button>
+    <button (click)="redo()"  title="Redo">↻</button>
+    <button (click)="save()"  title="Save">💾</button>
+    <button (click)="clear()" title="Clear">🗑️</button>
+
+    <hr class="border-gray-600 w-8"/>
+
+    <button (click)="toggleGrid()" title="Toggle Grid">
+      {{ enableGrid ? 'Grid On' : 'Grid Off' }}
+    </button>
+  </div>
+
+  <!-- 🌐  Center whiteboard canvas ▶️ -->
+  <div class="flex-1 bg-white overflow-hidden">
+    <ng-whiteboard
+      class="w-full h-full"
+      [data]="data"
+      (dataChange)="onDataChange($event)"
+      [selectedTool]="selectedTool"
+      [canvasWidth]="canvasWidth"
+      [canvasHeight]="canvasHeight"
+      [fullScreen]="fullScreen"
+      [strokeColor]="strokeColor"
+      [backgroundColor]="backgroundColor"
+      [fill]="fill"
+      [strokeWidth]="strokeWidth"
+      [zoom]="zoom"
+      [fontFamily]="fontFamily"
+      [fontSize]="fontSize"
+      [enableGrid]="enableGrid"
+      [gridSize]="gridSize"
+      [snapToGrid]="snapToGrid"
+      [lineJoin]="lineJoin"
+      [lineCap]="lineCap"
+      [dasharray]="dasharray"
+      [dashoffset]="dashoffset"
+      (ready)="onReady()"
+    ></ng-whiteboard>
+  </div>
+
+  <!-- ▶️  Right settings panel ▶️ -->
+  <div class="w-64 bg-gray-100 p-4 space-y-3 overflow-auto">
+    <h2 class="font-bold mb-2">Canvas</h2>
+    <label>Width:  <input type="number" [(ngModel)]="canvasWidth"/></label>
+    <label>Height: <input type="number" [(ngModel)]="canvasHeight"/></label>
+    <label><input type="checkbox" [(ngModel)]="fullScreen"/> Full Screen</label>
+
+    <h2 class="font-bold mt-4">Stroke</h2>
+    <label>Color:       <input type="color" [(ngModel)]="strokeColor"/></label>
+    <label>Width:       <input type="number" [(ngModel)]="strokeWidth"/></label>
+    <label>Fill:        <input type="color" [(ngModel)]="fill"/></label>
+
+    <h2 class="font-bold mt-4">View</h2>
+    <label>Zoom:        <input type="number" step="0.1" [(ngModel)]="zoom"/></label>
+
+    <h2 class="font-bold mt-4">Grid</h2>
+    <label><input type="checkbox" [(ngModel)]="enableGrid"/> Show Grid</label>
+    <label>Grid Size:   <input type="number" [(ngModel)]="gridSize"/></label>
+    <label><input type="checkbox" [(ngModel)]="snapToGrid"/> Snap to Grid</label>
+
+    <h2 class="font-bold mt-4">Advanced</h2>
+    <label>Line Join:
+      <select [(ngModel)]="lineJoin">
+        <option *ngFor="let opt of LineJoin | keyvalue" [ngValue]="opt.value">{{opt.key}}</option>
+      </select>
+    </label>
+    <label>Line Cap:
+      <select [(ngModel)]="lineCap">
+        <option *ngFor="let opt of LineCap | keyvalue" [ngValue]="opt.value">{{opt.key}}</option>
+      </select>
+    </label>
+    <label>Dash Array:  <input type="text"  [(ngModel)]="dasharray"/></label>
+    <label>Dash Offset:<input type="number"[(ngModel)]="dashoffset"/></label>
+  </div>
 </div>
