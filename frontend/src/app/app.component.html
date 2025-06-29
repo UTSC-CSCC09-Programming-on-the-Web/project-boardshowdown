@@ -3,7 +3,7 @@
   <h1 class="text-center text-2xl font-bold my-4">Collaborative Whiteboard</h1>
 </div>
 <!-- This file is part of the Angular application for a collaborative whiteboard. -->
-<div class="flex h-screen work-area">
+<div class="flex h-screen w-screen work-area">
   <!-- Left toolbar -->
   <div class="w-16 bg-gray-800 text-white flex flex-col items-center py-2 space-y-2">
     <button (click)="setTool(ToolType.Pen)"      title="Pen">✏️</button>
@@ -28,7 +28,7 @@
   </div>
 
   <!--Center whiteboard canvas  -->
-  <div class="flex-1 bg-white overflow-hidden">
+  <div class="flex-1 bg-white h-screen w-screen overflow-hidden">
     <ng-whiteboard
       class="w-full h-full"
       [data]="data"
