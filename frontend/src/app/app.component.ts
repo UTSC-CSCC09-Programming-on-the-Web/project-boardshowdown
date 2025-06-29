@@ -1,5 +1,5 @@
 // src/app/app.component.ts
-import { Component }             from '@angular/core';
+import { Component, OnInit }             from '@angular/core';
 import { FormsModule }           from '@angular/forms';
 import { CommonModule }          from '@angular/common';
 import {
@@ -10,8 +10,11 @@ import {
   ToolType,
   FormatType,
   LineJoin,
-  LineCap
+  LineCap,
+  ElementType
 } from 'ng-whiteboard';
+import * as Y from 'yjs';
+import { WebsocketProvider } from 'y-websocket';
 
 @Component({
   selector: 'app-root',
@@ -20,13 +23,19 @@ import {
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
 })
-export class AppComponent {
-  // —— state & bindings ——  
-  data: WhiteboardElement[] = [];
+export class AppComponent implements OnInit {
+
+  // —— state & bindings ——
+
   selectedTool: ToolType  = ToolType.Pen;
   options: WhiteboardOptions = {};
+  data: WhiteboardElement[] = []
 
-  // canvas & style settings  
+  private ydoc = new Y.Doc();
+  private provider = new WebsocketProvider('ws://localhost:12345', 'whiteboardd-room', this.ydoc);
+  private yarray = this.ydoc.getArray<WhiteboardElement>('canvas');
+
+  // canvas & style settings
   canvasWidth        = 8000;
   canvasHeight       = 6000;
   fullScreen         = false;
@@ -53,7 +62,6 @@ export class AppComponent {
 
   constructor(private wb: NgWhiteboardService) {}
 
-  // —— toolbar actions ——  
   setTool(tool: ToolType)     { this.selectedTool = tool; this.wb.setActiveTool(tool); }
   undo()                      { this.wb.undo(); }
   redo()                      { this.wb.redo(); }
@@ -61,10 +69,44 @@ export class AppComponent {
   save()                      { this.wb.save(this.FormatType.Base64, 'Board'); }
   toggleGrid()               { this.enableGrid = !this.enableGrid; }
 
-  // —— lifecycle & data events ——  
   onReady()                   { console.log('Whiteboard ready!'); }
-  onDataChange(d: WhiteboardElement[]) {
-    this.data = d;
-    console.log('Data changed:', d);
+
+
+ngOnInit(): void {
+  //this.data = this.yarray.toArray();
+  this.yarray.observe(() => {
+  const elements = this.yarray.toArray();
+  this.data = elements;
+});
+
+
+}
+
+onDataChange(d: WhiteboardElement[]) {
+ this.overrideCanvasData(d)
+
+}
+
+  overrideCanvasData(newElements: WhiteboardElement[]) {
+    const currentElements = this.yarray.toArray() as WhiteboardElement[];
+
+  const currentIds = new Set(currentElements.map(el => el.id));
+  const newIds = new Set(newElements.map(el => el.id));
+
+  const added = newElements.some(el => !currentIds.has(el.id));
+  const removed = currentElements.some(el => !newIds.has(el.id));
+
+  const hasChanges = added || removed;
+
+  if (!hasChanges) {
+    return;
   }
+
+  this.yarray.delete(0, this.yarray.length);
+  this.yarray.push(newElements);
+}
+
+
+
+
 }

@@ -18,6 +18,8 @@
     "ng-whiteboard": "^4.0.1",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
+    "y-websocket": "^3.0.0",
+    "yjs": "^13.6.27",
     "zone.js": "~0.15.0"
   },
   "devDependencies": {
