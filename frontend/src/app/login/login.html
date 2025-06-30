@@ -1,8 +1,17 @@
 <div class="min-h-screen flex items-center justify-center bg-white">
   <form [formGroup]="loginForm" (ngSubmit)="login()" class="space-y-4 w-[90%] sm:w-[70%] md:w-[50%] lg:w-[40%] xl:w-[30%] text-center">
-    <h1 class="text-2xl font-semibold">BoardShowdown</h1>
-    <p class="text-gray-600">Create an account</p>
-    <p class="text-sm text-gray-500 mb-4">Enter your email to sign up for this app</p>
+    <button type="button" (click)="toggleMode()" class="absolute right-4 top-4 text-sm underline">
+      {{ isSignUpMode() ? 'Already have an account? Sign in' : "Don't have an account? Sign up" }}
+    </button>
+    <h1 class="text-2xl font-semibold">
+      BoardShowdown
+    </h1>
+    <p class="text-gray-600">
+      {{ isSignUpMode() ? 'Create an account' : 'Sign in to your account' }}
+    </p>
+    <p class="text-sm text-gray-500 mb-4">
+      {{ isSignUpMode() ? 'Enter your email to sign up for this app' : 'Enter your email to sign in' }}
+    </p>
 
     <input
       formControlName="username"
@@ -23,7 +32,7 @@
       [disabled]="!isFormValid()"
       class="bg-black text-white p-3 rounded w-full font-medium hover:opacity-90 transition"
     >
-      Sign up with email
+      {{ isSignUpMode() ? 'Sign up with email' : 'Sign in with email' }}
     </button>
 
     <div class="my-6 w-full flex items-center text-gray-500">
@@ -47,6 +56,8 @@
     </p>
 
     <div class="mt-4 text-red-600 text-sm text-center" *ngIf="error()">{{ error() }}</div>
-    <div class="mt-4 text-green-600 text-sm text-center" *ngIf="success()">Login successful</div>
+    <div class="mt-4 text-green-600 text-sm text-center" *ngIf="success()">
+      {{ isSignUpMode() ? 'Sign up successful' : 'Login successful' }}
+    </div>
   </form>
 </div>

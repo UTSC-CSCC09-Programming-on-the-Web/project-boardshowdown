@@ -20,6 +20,7 @@ export class Login implements OnInit {
 
   @Output() loginSuccess = new EventEmitter<void>();
 
+  isSignUpMode = signal(false);
 
   constructor(private fb: FormBuilder, public auth: GoogleAuth) {}
 
@@ -41,15 +42,28 @@ export class Login implements OnInit {
 
   isFormValid = computed(() => this.loginForm.valid);
 
+  toggleMode() {
+    this.isSignUpMode.update(v => !v);
+    this.success.set(false);
+    this.error.set('');
+  }
+
   login() {
     const { username, password } = this.loginForm.value;
 
-    if (username === 'admin' && password === 'password') {
+    if (this.isSignUpMode()) {
+
       this.success.set(true);
       this.error.set('');
     } else {
-      this.success.set(false);
-      this.error.set('Invalid username or password.');
+
+      if (username === 'admin' && password === 'password') {
+        this.success.set(true);
+        this.error.set('');
+      } else {
+        this.success.set(false);
+        this.error.set('Invalid username or password.');
+      }
     }
   }
 
