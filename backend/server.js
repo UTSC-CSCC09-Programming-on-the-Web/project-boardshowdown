@@ -1,9 +1,9 @@
-const http = require('http');
-const WebSocket = require('ws');
-const { setupWSConnection } = require('y-websocket/bin/utils');
+import http from 'http';
+import { WebSocketServer } from 'ws';
+import { setupWSConnection } from 'y-websocket/bin/utils';
 
 const server = http.createServer();
-const wss = new WebSocket.Server({ server });
+const wss = new WebSocketServer({ server });
 
 wss.on('connection', (conn, req) => {
   setupWSConnection(conn, req);

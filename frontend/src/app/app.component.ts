@@ -24,6 +24,21 @@ import { WebsocketProvider } from 'y-websocket';
   styleUrls: ['./app.component.css'],
 })
 export class AppComponent implements OnInit {
+onSave($event: string) {
+
+fetch('http://localhost:3000/analyze-svg', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ base64: $event }),
+})
+  .then(response => response.json())
+  .then(result => {
+    console.log('Res:', result);
+  })
+  .catch(error => {
+    console.error('Error:', error);
+  });
+}
 
   // —— state & bindings ——
 
