@@ -10,6 +10,7 @@ import cors from 'cors';
 import bodyParser from 'body-parser';
 
 const app = express();
+const PORT = 3000;
 app.use(cors({
   origin: 'http://localhost:4200',
   credentials: true
@@ -185,4 +186,16 @@ app.get('/me', async (req, res) => {
   const { data: profile } = await oauth2.userinfo.get();
   res.json(profile);
 });
+
+// Database Stuff
+import { questionBankRouter } from "../routers/questionBankRouter.js";
+app.use("/api/question-bank", questionBankRouter);
+
+// app.listen(PORT, (err) => {
+//   if (err) console.log(err);
+//   else console.log("Backend running on http://localhost:%s", PORT);
+// });
+
+
+
 app.listen(3000, () => console.log('Server running on http://localhost:3000'));
