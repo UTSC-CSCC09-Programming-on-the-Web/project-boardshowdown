@@ -4,7 +4,7 @@ import { createUserTableQuery } from '../models/users.js';
 
 export const initializeDatabase = async () => {
   try {
-    console.log('🔄 Initializing database tables...');
+    console.log('Initializing database tables...');
     
     // Array of all table creation queries
     const tableQueries = [
@@ -16,20 +16,20 @@ export const initializeDatabase = async () => {
     for (const table of tableQueries) {
       try {
         await client.query(table.query);
-        console.log(`✅ Table '${table.name}' created/verified successfully`);
+        console.log(`Table '${table.name}' created/verified successfully`);
       } catch (error) {
-        console.error(`❌ Error creating table '${table.name}':`, error.message);
+        console.error(`Error creating table '${table.name}':`, error.message);
         throw error;
       }
     }
     
-    console.log('🎉 Database initialization completed successfully!');
+    console.log('Database initialization completed successfully!');
     
     // Optional: Insert sample data if tables are empty
     await insertSampleData();
     
   } catch (error) {
-    console.error('💥 Database initialization failed:', error);
+    console.error('Database initialization failed:', error);
     throw error;
   }
 };
@@ -41,7 +41,7 @@ const insertSampleData = async () => {
     const count = parseInt(questionsCount.rows[0].count);
     
     if (count === 0) {
-      console.log('📝 Inserting sample questions...');
+      console.log('Inserting sample questions...');
       
       const sampleQuestions = [
         { questions: 'What is 2 + 2?', solutions: 4 },
@@ -58,13 +58,13 @@ const insertSampleData = async () => {
         );
       }
       
-      console.log(`✅ Inserted ${sampleQuestions.length} sample questions`);
+      console.log(`Inserted ${sampleQuestions.length} sample questions`);
     } else {
-      console.log(`ℹ️  Questions table already contains ${count} records`);
+      console.log(`Questions table already contains ${count} records`);
     }
     
   } catch (error) {
-    console.error('⚠️  Error inserting sample data:', error.message);
+    console.error('Error inserting sample data:', error.message);
     // Don't throw here - sample data is optional
   }
 };
