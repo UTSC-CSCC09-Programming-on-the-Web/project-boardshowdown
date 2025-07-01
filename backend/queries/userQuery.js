@@ -5,17 +5,17 @@ export const userQuery = (function () {
 
     module.getUserByIdQuery = `SELECT * FROM Users WHERE id = $1;`;
 
-    module.getUserByUsernameQuery = `SELECT * FROM Users WHERE username = $1;`;
+    module.getUserByEmailQuery = `SELECT * FROM Users WHERE email = $1;`;
 
     module.createUserQuery = `
-        INSERT INTO Users (username, password)
+        INSERT INTO Users (email, password)
         VALUES ($1, $2)
         RETURNING *;
     `;
 
     module.updateUserQuery = `
         UPDATE Users
-        SET username = $1, password = $2
+        SET email = $1, password = $2
         WHERE id = $3
         RETURNING *;
     `;
@@ -26,6 +26,15 @@ export const userQuery = (function () {
 
     module.getUserCountQuery = `SELECT COUNT(*) FROM Users;`;
 
+    module.loginUserQuery = `
+        SELECT * FROM Users
+        WHERE email = $1 AND password = $2;
+    `;
+
+    // For sign in, we'll get user by email and verify password separately
+    module.signInUserQuery = `SELECT * FROM Users WHERE email = $1;`;
+
+    
     return module;
 
 })();

@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@y/websocket-server": "^0.1.1",
+    "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
     "express": "^4.18.2",
     "express-session": "^1.18.1",
@@ -21,6 +22,7 @@
     "yjs": "^13.6.27"
   },
   "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
     "nodemon": "^3.1.10",
     "prettier": "^2.8.8"
   }

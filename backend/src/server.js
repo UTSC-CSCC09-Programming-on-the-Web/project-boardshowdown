@@ -190,7 +190,6 @@ app.get('/me', async (req, res) => {
 // Database Stuff
 import { questionBankRouter } from "../routers/questionBankRouter.js";
 import { userRouter } from "../routers/userRouter.js";
-import { initializeDatabase } from "../utils/dbInit.js";
 
 app.use("/api/question-bank", questionBankRouter);
 app.use("/api/users", userRouter);
@@ -202,13 +201,4 @@ app.use("/api/users", userRouter);
 
 
 
-app.listen(3000, async () => {
-  console.log('Server running on http://localhost:3000');
-  
-  // Initialize database tables
-  try {
-    await initializeDatabase();
-  } catch (error) {
-    console.error('Failed to initialize database. Server will continue running but database operations may fail.');
-  }
-});
+app.listen(3000, () => console.log('Server running on http://localhost:3000'));

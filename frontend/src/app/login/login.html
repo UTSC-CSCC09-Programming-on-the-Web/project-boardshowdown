@@ -14,7 +14,7 @@
     </p>
 
     <input
-      formControlName="username"
+      formControlName="email"
       type="email"
       placeholder="email@domain.com"
       class="border border-gray-300 p-3 w-full rounded focus:outline-none focus:ring-2 focus:ring-black"
@@ -29,10 +29,11 @@
 
     <button
       type="submit"
-      [disabled]="!isFormValid()"
-      class="bg-black text-white p-3 rounded w-full font-medium hover:opacity-90 transition"
+      [disabled]="loading()"
+      class="bg-black text-white p-3 rounded w-full font-medium hover:opacity-90 transition disabled:opacity-50"
     >
-      {{ isSignUpMode() ? 'Sign up with email' : 'Sign in with email' }}
+      <span *ngIf="loading()" class="mr-2">⏳</span>
+      {{ loading() ? 'Please wait...' : (isSignUpMode() ? 'Sign up with email' : 'Sign in with email') }}
     </button>
 
     <div class="my-6 w-full flex items-center text-gray-500">
