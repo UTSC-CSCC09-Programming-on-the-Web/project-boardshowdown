@@ -4,28 +4,6 @@
 </div>
 <!-- This file is part of the Angular application for a collaborative whiteboard. -->
 <div class="flex h-screen w-screen work-area">
-  <!-- Left toolbar -->
-  <div class="w-16 bg-gray-800 text-white flex flex-col items-center py-2 space-y-2">
-    <button (click)="setTool(ToolType.Pen)"      title="Pen">✏️</button>
-    <button (click)="setTool(ToolType.Line)"     title="Line">—</button>
-    <button (click)="setTool(ToolType.Rectangle)"title="Rect">▭</button>
-    <button (click)="setTool(ToolType.Ellipse)"  title="Ellipse">◯</button>
-    <button (click)="setTool(ToolType.Text)"     title="Text">T</button>
-    <button (click)="setTool(ToolType.Eraser)"   title="Eraser">🧹</button>
-
-    <hr class="border-gray-600 w-8"/>
-
-    <button (click)="undo()"  title="Undo">↺</button>
-    <button (click)="redo()"  title="Redo">↻</button>
-    <button (click)="save()"  title="Save">💾</button>
-    <button (click)="clear()" title="Clear">🗑️</button>
-
-    <hr class="border-gray-600 w-8"/>
-
-    <button (click)="toggleGrid()" title="Toggle Grid">
-      {{ enableGrid ? 'Grid On' : 'Grid Off' }}
-    </button>
-  </div>
 
   <!--Center whiteboard canvas  -->
   <div class="flex-1 bg-white h-screen w-screen overflow-hidden">
@@ -57,37 +35,127 @@
   </div>
 
   <!-- Right settings panel -->
-  <div class="w-64 bg-gray-100 p-4 space-y-3 overflow-auto">
-    <h2 class="font-bold mb-2">Canvas</h2>
-    <label>Width:  <input type="number" [(ngModel)]="canvasWidth"/></label>
-    <label>Height: <input type="number" [(ngModel)]="canvasHeight"/></label>
-    <label><input type="checkbox" [(ngModel)]="fullScreen"/> Full Screen</label>
+<aside
+  class="w-64 bg-white shadow-lg p-4 space-y-4 overflow-auto"
+  role="complementary"
+  aria-label="Whiteboard settings"
+>
+  <!-- Tools (always open) -->
+  <section aria-label="Drawing tools">
+    <h2 class="text-lg font-semibold mb-2">Tools</h2>
+    <div class="flex flex-wrap gap-2">
+      <button
+        class="tool-btn"
+        (click)="setTool(ToolType.Pen)"
+        title="Pen"
+        aria-label="Pen tool"
+      >✏️</button>
+      <button class="tool-btn" (click)="setTool(ToolType.Line)" title="Line" aria-label="Line tool">—</button>
+      <button class="tool-btn" (click)="setTool(ToolType.Rectangle)" title="Rectangle" aria-label="Rectangle tool">▭</button>
+      <button class="tool-btn" (click)="setTool(ToolType.Ellipse)" title="Ellipse" aria-label="Ellipse tool">◯</button>
+      <button class="tool-btn" (click)="setTool(ToolType.Text)" title="Text" aria-label="Text tool">T</button>
+      <button class="tool-btn" (click)="setTool(ToolType.Eraser)" title="Eraser" aria-label="Eraser tool">🧹</button>
+    </div>
+  </section>
 
-    <h2 class="font-bold mt-4">Stroke</h2>
-    <label>Color:       <input type="color" [(ngModel)]="strokeColor"/></label>
-    <label>Width:       <input type="number" [(ngModel)]="strokeWidth"/></label>
-    <label>Fill:        <input type="color" [(ngModel)]="fill"/></label>
+  <!-- Actions -->
+  <details>
+    <summary class="text-lg font-semibold mb-2 cursor-pointer">
+      Actions
+    </summary>
+    <div class="flex gap-2 mt-2">
+      <button class="action-btn" (click)="undo()" title="Undo" aria-label="Undo">↺</button>
+      <button class="action-btn" (click)="redo()" title="Redo" aria-label="Redo">↻</button>
+      <button class="action-btn" (click)="save()" title="Save" aria-label="Save">💾</button>
+      <button class="action-btn" (click)="clear()" title="Clear" aria-label="Clear">🗑️</button>
+    </div>
+  </details>
 
-    <h2 class="font-bold mt-4">View</h2>
-    <label>Zoom:        <input type="number" step="0.1" [(ngModel)]="zoom"/></label>
-
-    <h2 class="font-bold mt-4">Grid</h2>
-    <label><input type="checkbox" [(ngModel)]="enableGrid"/> Show Grid</label>
-    <label>Grid Size:   <input type="number" [(ngModel)]="gridSize"/></label>
-    <label><input type="checkbox" [(ngModel)]="snapToGrid"/> Snap to Grid</label>
-
-    <h2 class="font-bold mt-4">Advanced</h2>
-    <label>Line Join:
-      <select [(ngModel)]="lineJoin">
-        <option *ngFor="let opt of LineJoin | keyvalue" [ngValue]="opt.value">{{opt.key}}</option>
-      </select>
+  <!-- Grid Toggle -->
+  <div class="flex items-center">
+    <input
+      id="grid-toggle"
+      type="checkbox"
+      class="mr-2"
+      [(ngModel)]="enableGrid"
+    />
+    <label for="grid-toggle" class="font-medium">
+      {{ enableGrid ? 'Grid On' : 'Grid Off' }}
     </label>
-    <label>Line Cap:
-      <select [(ngModel)]="lineCap">
-        <option *ngFor="let opt of LineCap | keyvalue" [ngValue]="opt.value">{{opt.key}}</option>
-      </select>
-    </label>
-    <label>Dash Array:  <input type="text"  [(ngModel)]="dasharray"/></label>
-    <label>Dash Offset:<input type="number"[(ngModel)]="dashoffset"/></label>
   </div>
+
+  <!-- Canvas Settings -->
+  <details>
+    <summary class="text-lg font-semibold mb-2 cursor-pointer">
+      Canvas
+    </summary>
+    <div class="mt-2 space-y-2">
+      <label class="flex justify-between">
+        <span>Width</span>
+        <input type="number" class="w-16 text-right" [(ngModel)]="canvasWidth"/>
+      </label>
+      <label class="flex justify-between">
+        <span>Height</span>
+        <input type="number" class="w-16 text-right" [(ngModel)]="canvasHeight"/>
+      </label>
+      <label class="inline-flex items-center">
+        <input type="checkbox" class="mr-2" [(ngModel)]="fullScreen"/>
+        Full screen
+      </label>
+    </div>
+  </details>
+
+  <!-- Stroke Settings -->
+  <details>
+    <summary class="text-lg font-semibold mb-2 cursor-pointer">
+      Stroke
+    </summary>
+    <div class="mt-2 space-y-2">
+      <label class="flex justify-between items-center">
+        <span>Color</span>
+        <input type="color" [(ngModel)]="strokeColor"/>
+      </label>
+      <label class="flex justify-between items-center">
+        <span>Width</span>
+        <input type="number" class="w-16 text-right" [(ngModel)]="strokeWidth"/>
+      </label>
+      <label class="flex justify-between items-center">
+        <span>Fill</span>
+        <input type="color" [(ngModel)]="fill"/>
+      </label>
+    </div>
+  </details>
+
+  <!-- View -->
+  <details>
+    <summary class="text-lg font-semibold mb-2 cursor-pointer">
+      View
+    </summary>
+    <div class="mt-2">
+      <label class="flex justify-between">
+        <span>Zoom</span>
+        <input type="number" step="0.1" class="w-16 text-right" [(ngModel)]="zoom"/>
+      </label>
+    </div>
+  </details>
+
+  <!-- Grid Settings -->
+  <details>
+    <summary class="text-lg font-semibold mb-2 cursor-pointer">
+      Grid Settings
+    </summary>
+    <div class="mt-2 space-y-2">
+      <label class="flex justify-between">
+        <span>Grid Size</span>
+        <input type="number" class="w-16 text-right" [(ngModel)]="gridSize"/>
+      </label>
+      <label class="inline-flex items-center">
+        <input type="checkbox" class="mr-2" [(ngModel)]="snapToGrid"/>
+        Snap to grid
+      </label>
+    </div>
+  </details>
+</aside>
+
+
 </div>
