@@ -1,5 +1,5 @@
 import { client } from "../datasource.js";
-import { createUserTable } from "../models/users.js";
+import { createUserTableQuery } from "../models/users.js";
 import { createQuestionBankquery } from "../models/questionBank.js";
 
 export async function initializeDatabase() {
@@ -7,7 +7,7 @@ export async function initializeDatabase() {
     console.log("Initializing database...");
 
     // Create Users table
-    await client.query(createUserTable);
+    await client.query(createUserTableQuery);
     console.log("Users table created/verified");
 
     // Create Questions table
