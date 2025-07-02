@@ -190,6 +190,12 @@ app.get('/me', async (req, res) => {
 // Database Stuff
 import { questionBankRouter } from "../routers/questionBankRouter.js";
 import { userRouter } from "../routers/userRouter.js";
+import { initializeDatabase } from "../utils/dbInit.js";
+
+// Initialize database
+initializeDatabase()
+  .then(() => console.log("Database initialized successfully"))
+  .catch((err) => console.error("Database initialization failed:", err));
 
 app.use("/api/question-bank", questionBankRouter);
 app.use("/api/users", userRouter);
