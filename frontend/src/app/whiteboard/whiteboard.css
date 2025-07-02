@@ -1,0 +1,89 @@
+/* Question Sidebar Styles */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Smooth transitions for sidebar */
+aside {
+  min-height: 100vh;
+}
+
+/* Custom scrollbar for sidebar */
+.overflow-auto::-webkit-scrollbar {
+  width: 6px;
+}
+
+.overflow-auto::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.overflow-auto::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.overflow-auto::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Animation for loading spinner */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Button and panel styles */
+.tool-btn, .action-btn {
+  @apply px-3 py-2 bg-gray-200 hover:bg-gray-300 rounded-md text-sm font-medium transition-colors;
+}
+
+.tool-btn:hover, .action-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Focus styles for accessibility */
+button:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Whiteboard container styles */
+.work-area {
+  min-height: 0; /* Important for flex containers */
+}
+
+/* Ensure whiteboard takes full space */
+ng-whiteboard {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Tool and action button styles */
+.tool-btn, .action-btn {
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tool-btn:hover, .action-btn:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+.tool-btn:active, .action-btn:active {
+  background: #e5e7eb;
+}

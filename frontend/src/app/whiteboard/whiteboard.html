@@ -1,0 +1,251 @@
+<!-- src/app/app.component.html -->
+<div class="h-screen flex flex-col">
+  <div>
+    <h1 class="text-center text-2xl font-bold my-4">Collaborative Whiteboard</h1>
+  </div>
+  <!-- This file is part of the Angular application for a collaborative whiteboard. -->
+  <div class="flex flex-1 work-area">
+
+  <!-- Left Question Sidebar -->
+  <aside 
+    class="bg-gray-50 shadow-lg transition-all duration-300 overflow-hidden flex-shrink-0"
+    [class.w-80]="questionSidebarOpen"
+    [class.w-12]="!questionSidebarOpen"
+    role="complementary"
+    aria-label="Question bank"
+  >
+    <!-- Sidebar Toggle Button -->
+    <div class="h-full flex flex-col">
+      <button
+        (click)="toggleQuestionSidebar()"
+        class="p-3 bg-blue-600 text-white hover:bg-blue-700 transition-colors flex items-center justify-center"
+        [title]="questionSidebarOpen ? 'Hide Questions' : 'Show Questions'"
+        aria-label="Toggle question sidebar"
+      >
+        <span class="text-lg" [innerHTML]="questionSidebarOpen ? '◀' : '▶'"></span>
+        <span *ngIf="questionSidebarOpen" class="ml-2 text-sm font-medium">Questions</span>
+      </button>
+
+      <!-- Sidebar Content -->
+      <div *ngIf="questionSidebarOpen" class="flex-1 p-4 overflow-auto">
+        <!-- Current Question Display -->
+        <div *ngIf="currentQuestion" class="mb-6 p-4 bg-white rounded-lg shadow-sm border-l-4 border-blue-500">
+          <h3 class="font-semibold text-gray-800 mb-2">Current Question</h3>
+          <p class="text-gray-700 mb-3">{{ currentQuestion.questions }}</p>
+          <div class="text-sm text-gray-500">
+            Question ID: {{ currentQuestion.id }}
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="mb-4 space-y-2">
+          <button
+            (click)="loadRandomQuestion()"
+            [disabled]="loadingQuestions"
+            class="w-full px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-gray-400 transition-colors"
+          >
+            {{ loadingQuestions ? 'Loading...' : 'Get Random Question' }}
+          </button>
+          
+          <button
+            (click)="loadQuestions()"
+            [disabled]="loadingQuestions"
+            class="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 transition-colors"
+          >
+            {{ loadingQuestions ? 'Loading...' : 'Refresh Questions' }}
+          </button>
+        </div>
+
+        <!-- Error Message -->
+        <div *ngIf="questionError" class="mb-4 p-3 bg-red-100 border border-red-300 text-red-700 rounded-md">
+          {{ questionError }}
+        </div>
+
+        <!-- Questions List -->
+        <div class="space-y-2">
+          <h3 class="font-semibold text-gray-800 mb-3">All Questions ({{ questions.length }})</h3>
+          
+          <div *ngIf="loadingQuestions && questions.length === 0" class="text-center py-4">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+            <p class="text-gray-500 mt-2">Loading questions...</p>
+          </div>
+
+          <div 
+            *ngFor="let question of questions; trackBy: trackByQuestionId" 
+            class="p-3 bg-white rounded-md shadow-sm border cursor-pointer hover:bg-blue-50 transition-colors"
+            [class.ring-2]="currentQuestion?.id === question.id"
+            [class.ring-blue-500]="currentQuestion?.id === question.id"
+            (click)="selectQuestion(question)"
+          >
+            <div class="text-sm font-medium text-gray-800 mb-1">
+              Question {{ question.id }}
+            </div>
+            <div class="text-sm text-gray-600 line-clamp-2">
+              {{ question.questions }}
+            </div>
+          </div>
+
+          <div *ngIf="!loadingQuestions && questions.length === 0" class="text-center py-8 text-gray-500">
+            <p>No questions available.</p>
+            <p class="text-sm mt-1">Click "Refresh Questions" to load from the database.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!--Center whiteboard canvas  -->
+  <div class="flex-1 bg-white h-full overflow-hidden">
+    <ng-whiteboard
+      class="w-full h-full"
+      [data]="data"
+      (dataChange)="onDataChange($event)"
+      [selectedTool]="selectedTool"
+      [canvasWidth]="canvasWidth"
+      [canvasHeight]="canvasHeight"
+      [fullScreen]="fullScreen"
+      [strokeColor]="strokeColor"
+      [backgroundColor]="backgroundColor"
+      [fill]="fill"
+      [strokeWidth]="strokeWidth"
+      [zoom]="zoom"
+      [fontFamily]="fontFamily"
+      [fontSize]="fontSize"
+      [enableGrid]="enableGrid"
+      [gridSize]="gridSize"
+      [snapToGrid]="snapToGrid"
+      [lineJoin]="lineJoin"
+      [lineCap]="lineCap"
+      [dasharray]="dasharray"
+      [dashoffset]="dashoffset"
+      (save)="onSave($event)"
+      (ready)="onReady()"
+    ></ng-whiteboard>
+  </div>
+
+  <!-- Right settings panel -->
+<aside
+  class="w-64 bg-white shadow-lg p-4 space-y-4 overflow-auto"
+  role="complementary"
+  aria-label="Whiteboard settings"
+>
+  <!-- Tools (always open) -->
+  <section aria-label="Drawing tools">
+    <h2 class="text-lg font-semibold mb-2">Tools</h2>
+    <div class="flex flex-wrap gap-2">
+      <button
+        class="tool-btn"
+        (click)="setTool(ToolType.Pen)"
+        title="Pen"
+        aria-label="Pen tool"
+      >✏️</button>
+      <button class="tool-btn" (click)="setTool(ToolType.Line)" title="Line" aria-label="Line tool">—</button>
+      <button class="tool-btn" (click)="setTool(ToolType.Rectangle)" title="Rectangle" aria-label="Rectangle tool">▭</button>
+      <button class="tool-btn" (click)="setTool(ToolType.Ellipse)" title="Ellipse" aria-label="Ellipse tool">◯</button>
+      <button class="tool-btn" (click)="setTool(ToolType.Text)" title="Text" aria-label="Text tool">T</button>
+      <button class="tool-btn" (click)="setTool(ToolType.Eraser)" title="Eraser" aria-label="Eraser tool">🧹</button>
+    </div>
+  </section>
+
+  <!-- Actions -->
+  <details>
+    <summary class="text-lg font-semibold mb-2 cursor-pointer">
+      Actions
+    </summary>
+    <div class="flex gap-2 mt-2">
+      <button class="action-btn" (click)="undo()" title="Undo" aria-label="Undo">↺</button>
+      <button class="action-btn" (click)="redo()" title="Redo" aria-label="Redo">↻</button>
+      <button class="action-btn" (click)="save()" title="Save" aria-label="Save">💾</button>
+      <button class="action-btn" (click)="clear()" title="Clear" aria-label="Clear">🗑️</button>
+    </div>
+  </details>
+
+  <!-- Grid Toggle -->
+  <div class="flex items-center">
+    <input
+      id="grid-toggle"
+      type="checkbox"
+      class="mr-2"
+      [(ngModel)]="enableGrid"
+    />
+    <label for="grid-toggle" class="font-medium">
+      {{ enableGrid ? 'Grid On' : 'Grid Off' }}
+    </label>
+  </div>
+
+  <!-- Canvas Settings -->
+  <details>
+    <summary class="text-lg font-semibold mb-2 cursor-pointer">
+      Canvas
+    </summary>
+    <div class="mt-2 space-y-2">
+      <label class="flex justify-between">
+        <span>Width</span>
+        <input type="number" class="w-16 text-right" [(ngModel)]="canvasWidth"/>
+      </label>
+      <label class="flex justify-between">
+        <span>Height</span>
+        <input type="number" class="w-16 text-right" [(ngModel)]="canvasHeight"/>
+      </label>
+      <label class="inline-flex items-center">
+        <input type="checkbox" class="mr-2" [(ngModel)]="fullScreen"/>
+        Full screen
+      </label>
+    </div>
+  </details>
+
+  <!-- Stroke Settings -->
+  <details>
+    <summary class="text-lg font-semibold mb-2 cursor-pointer">
+      Stroke
+    </summary>
+    <div class="mt-2 space-y-2">
+      <label class="flex justify-between items-center">
+        <span>Color</span>
+        <input type="color" [(ngModel)]="strokeColor"/>
+      </label>
+      <label class="flex justify-between items-center">
+        <span>Width</span>
+        <input type="number" class="w-16 text-right" [(ngModel)]="strokeWidth"/>
+      </label>
+      <label class="flex justify-between items-center">
+        <span>Fill</span>
+        <input type="color" [(ngModel)]="fill"/>
+      </label>
+    </div>
+  </details>
+
+  <!-- View -->
+  <details>
+    <summary class="text-lg font-semibold mb-2 cursor-pointer">
+      View
+    </summary>
+    <div class="mt-2">
+      <label class="flex justify-between">
+        <span>Zoom</span>
+        <input type="number" step="0.1" class="w-16 text-right" [(ngModel)]="zoom"/>
+      </label>
+    </div>
+  </details>
+
+  <!-- Grid Settings -->
+  <details>
+    <summary class="text-lg font-semibold mb-2 cursor-pointer">
+      Grid Settings
+    </summary>
+    <div class="mt-2 space-y-2">
+      <label class="flex justify-between">
+        <span>Grid Size</span>
+        <input type="number" class="w-16 text-right" [(ngModel)]="gridSize"/>
+      </label>
+      <label class="inline-flex items-center">
+        <input type="checkbox" class="mr-2" [(ngModel)]="snapToGrid"/>
+        Snap to grid
+      </label>
+    </div>
+  </details>
+</aside>
+
+
+</div>
+</div>

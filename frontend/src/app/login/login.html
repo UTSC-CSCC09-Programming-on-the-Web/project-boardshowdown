@@ -1,0 +1,64 @@
+<div class="min-h-screen flex items-center justify-center bg-white">
+  <form [formGroup]="loginForm" (ngSubmit)="login()" class="space-y-4 w-[90%] sm:w-[70%] md:w-[50%] lg:w-[40%] xl:w-[30%] text-center">
+    <button type="button" (click)="toggleMode()" class="absolute right-4 top-4 text-sm underline">
+      {{ isSignUpMode() ? 'Already have an account? Sign in' : "Don't have an account? Sign up" }}
+    </button>
+    <h1 class="text-2xl font-semibold">
+      BoardShowdown
+    </h1>
+    <p class="text-gray-600">
+      {{ isSignUpMode() ? 'Create an account' : 'Sign in to your account' }}
+    </p>
+    <p class="text-sm text-gray-500 mb-4">
+      {{ isSignUpMode() ? 'Enter your email to sign up for this app' : 'Enter your email to sign in' }}
+    </p>
+
+    <input
+      formControlName="email"
+      type="email"
+      placeholder="email@domain.com"
+      class="border border-gray-300 p-3 w-full rounded focus:outline-none focus:ring-2 focus:ring-black"
+    />
+
+    <input
+      formControlName="password"
+      type="password"
+      placeholder="Password"
+      class="border border-gray-300 p-3 w-full rounded focus:outline-none focus:ring-2 focus:ring-black"
+    />
+
+    <button
+      type="submit"
+      [disabled]="loading()"
+      class="bg-black text-white p-3 rounded w-full font-medium hover:opacity-90 transition disabled:opacity-50"
+    >
+      <span *ngIf="loading()" class="mr-2">⏳</span>
+      {{ loading() ? 'Please wait...' : (isSignUpMode() ? 'Sign up with email' : 'Sign in with email') }}
+    </button>
+
+    <div class="my-6 w-full flex items-center text-gray-500">
+      <hr class="flex-grow border-gray-300" />
+      <span class="mx-2 text-sm whitespace-nowrap">or continue with</span>
+      <hr class="flex-grow border-gray-300" />
+    </div>
+
+    <button
+      (click)="loginWithGoogle()"
+      class="flex items-center justify-center gap-2 border border-gray-300 p-3 rounded w-full hover:bg-gray-100 transition"
+    >
+      <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" class="w-5 h-5" />
+      <span class="text-sm font-medium text-gray-700">Google</span>
+    </button>
+
+    <p class="text-xs text-gray-500 text-center mt-6">
+      By clicking continue, you agree to our
+      <a href="#" class="underline">Terms of Service</a> and
+      <a href="#" class="underline">Privacy Policy</a>
+    </p>
+
+    <div class="mt-4 text-red-600 text-sm text-center" *ngIf="error()">{{ error() }}</div>
+    <div class="mt-4 text-green-600 text-sm text-center" *ngIf="success()">
+      {{ isSignUpMode() ? 'Sign up successful' : 'Login successful' }}
+    </div>
+  </form>
+</div>
