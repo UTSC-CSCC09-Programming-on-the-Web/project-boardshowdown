@@ -21,6 +21,29 @@ questionBankRouter.get("/", async (req, res) => {
   }
 });
 
+// Get a random question from the question bank (MUST be before /:id route)
+questionBankRouter.get("/random", async (req, res) => {
+  try {
+    const result = await client.query(questionBankQuery.getRandomQuestionQuery);
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: "No questions available"
+      });
+    }
+    res.json({
+      success: true,
+      data: result.rows[0]
+    });
+  } catch (error) {
+    console.error("Error fetching random question:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to fetch random question"
+    });
+  }
+});
+
 // Get a specific question by ID
 questionBankRouter.get("/:id", async (req, res) => {
   try {
@@ -41,29 +64,6 @@ questionBankRouter.get("/:id", async (req, res) => {
     res.status(500).json({
       success: false,
       error: "Failed to fetch question"
-    });
-  }
-});
-
-// Get a random question from the question bank
-questionBankRouter.get("/random", async (req, res) => {
-  try {
-    const result = await client.query(questionBankQuery.getRandomQuestionQuery);
-    if (result.rows.length === 0) {
-      return res.status(404).json({
-        success: false,
-        error: "No questions available"
-      });
-    }
-    res.json({
-      success: true,
-      data: result.rows[0]
-    });
-  } catch (error) {
-    console.error("Error fetching random question:", error);
-    res.status(500).json({
-      success: false,
-      error: "Failed to fetch random question"
     });
   }
 });
