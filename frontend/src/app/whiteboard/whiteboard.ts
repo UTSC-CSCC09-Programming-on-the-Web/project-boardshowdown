@@ -34,8 +34,26 @@ fetch('http://localhost:3000/analyze-svg', {
   body: JSON.stringify({ base64: $event }),
 })
   .then(response => response.json())
-  .then(result => {
-    console.log('Res:', result);
+  .then(data => {
+    // `data.response` is already an un-escaped JS string:
+    const latex = data.response.trim();
+    console.log(latex);      // logs: \int_{0}^{\infty} 1 \, dx
+    // now you can copy it directly from the console and paste into your .tex
+    const blob = new Blob([latex], { type: 'text/plain' });
+
+    // 3) Create a temporary download link
+    const url = URL.createObjectURL(blob);
+    const a   = document.createElement('a');
+    a.href    = url;
+    a.download = 'LaTeX_Answer.tex';  // name of the downloaded file
+
+    // 4) Programmatically click it to trigger download
+    document.body.appendChild(a); // needed for Firefox
+    a.click();
+
+    // 5) Clean up
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   })
   .catch(error => {
     console.error('Error:', error);

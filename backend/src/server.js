@@ -156,16 +156,37 @@ app.post('/analyze-svg', async (req, res) => {
 
   try {
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o',
+model: 'gpt-4o',
       messages: [
+        // SYSTEM: OCR + LaTeX only
+        {
+          role: 'system',
+          content: [
+            'You are an OCR and LaTeX assistant.',
+            'Your only job is to extract exactly the characters the user has drawn in the provided image,',
+            'then convert that into valid LaTeX syntax.',
+            'Output *only* the LaTeX—no SVG, no commentary, no extra formatting.'
+          ].join(' ')
+        },
+        // USER: provide the SVG and a concrete example
         {
           role: 'user',
           content: [
-            { type: 'image_url', image_url: { url: dataUri } },
-            { type: 'text', text: 'What do you see in this SVG?' },
-          ],
-        },
-      ],
+            { type: 'image_url', image_url: { url: base64 } },
+            {
+              type: 'text',
+              text: [
+                'Please return only the LaTeX you see in this image.',
+                'For example, if the user has drawn an integral from –∞ to ∞ of x² dx = 1, output exactly:',
+                '',
+                '\\int_{-\infty}^{\\infty} x^2 \\,dx = 1',
+                '',
+                'No code fences. No extra lines. No SVG tags. No explanation.'
+              ].join('\n')
+            }
+          ]
+        }
+      ]
     });
 
     res.json({ response: completion.choices[0].message.content });
