@@ -15,11 +15,18 @@ export interface QuestionResponse {
   error?: string;
 }
 
+export interface CheckSolutionResult {
+  extractedLatex: string;
+  expected: number;
+  feedback: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class QuestionService {
   private apiUrl = 'http://localhost:3000/api/question-bank';
+  private apiUrl2 = 'http://localhost:3000/check-solution-ai';
 
   constructor(private http: HttpClient) {}
 
@@ -52,4 +59,12 @@ export class QuestionService {
   deleteQuestion(id: number): Observable<QuestionResponse> {
     return this.http.delete<QuestionResponse>(`${this.apiUrl}/${id}`);
   }
+
+  checkSolution(boardImage: string, questionId: number): Observable<CheckSolutionResult> {
+    return this.http.post<CheckSolutionResult>(this.apiUrl2, {
+      base64: boardImage,
+      questionId
+    });
+  }
+
 }

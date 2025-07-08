@@ -16,7 +16,7 @@ import {
 } from 'ng-whiteboard';
 import * as Y from 'yjs';
 import { WebsocketProvider } from 'y-websocket';
-import { QuestionService, Question } from '../services/question.service';
+import { QuestionService, Question, CheckSolutionResult } from '../services/question.service';
 
 
 @Component({
@@ -26,32 +26,133 @@ import { QuestionService, Question } from '../services/question.service';
   styleUrls: ['./whiteboard.css']
 })
 export class WhiteboardComponent implements OnInit {
-onSave($event: string) {
 
-fetch('http://localhost:3000/analyze-svg', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ base64: $event }),
-})
+   showFeedbackModal = false;
+  feedback: {
+    icon: string;
+    status: string;
+    message: string;
+    correctAnswer: string;
+  } = {
+    icon: '',
+    status: '',
+    message: '',
+    correctAnswer: ''
+  };
+
+  openFeedbackModal(feedbackData: typeof this.feedback) {
+    this.feedback = feedbackData;
+    this.showFeedbackModal = true;
+  }
+
+  closeFeedbackModal() {
+    this.showFeedbackModal = false;
+  }
+
+  onSubmitAnswer() {
+    this.wb.save(this.FormatType.Base64, 'Board');
+
+    if (!this.currentQuestion) {
+      console.error('No question selected');
+      return;
+    }
+
+    setTimeout(() => {
+      if (!this.lastSvgBase64) {
+        console.error('Board export failed');
+        return;
+      }
+      this.submitPayload(this.lastSvgBase64);
+    }, 50);
+
+    console.log('Submitting answer for question ID:', this.currentQuestion.id);
+  }
+  
+onSave(svgBase64: string) {
+  this.lastSvgBase64 = svgBase64;
+}
+
+private submitPayload(boardImage: string) {
+    console.log('Submitting board image:', boardImage);
+
+    if (!this.currentQuestion) {
+      console.error('No question selected');
+      return;
+    }
+
+    console.log('Checking solution for question ID:', this.currentQuestion.id);
+    // show spinner or initial modal state if you like
+    //this.openFeedbackModal(this.feedback);
+
+    this.questionService
+      .checkSolution(boardImage, this.currentQuestion.id)
+      .subscribe({
+        next: (data: CheckSolutionResult) => {
+          const raw = data.feedback.trim();
+          const isCorrect = raw.startsWith('✅');
+          const icon = raw.charAt(0);
+          const message = raw.slice(1).trim();
+
+          this.feedback = {
+            icon,
+            status: isCorrect ? 'Correct' : 'Incorrect',
+            message,
+            correctAnswer: data.expected.toString(),
+          };
+
+          this.openFeedbackModal(this.feedback);
+        },
+        error: err => {
+          console.error('Check failed:', err);
+          // optionally show an error state in your modal
+        }
+      });
+  }
+
+
+exportLatex() {
+  this.wb.save(this.FormatType.Base64, 'Board');
+
+    setTimeout(() => {
+      if (!this.lastSvgBase64) {
+        console.error('Board export failed');
+        return;
+      }
+      this.exportLatexCall(this.lastSvgBase64);
+    }, 50);
+
+    
+  this.wb.save(this.FormatType.Base64, 'Board');
+  console.log('Exporting LaTeX...');
+  if (!this.lastSvgBase64) {
+    console.error('No SVG data available to export');
+    return;
+  }
+}
+exportLatexCall(boardImage: string) {
+  fetch('http://localhost:3000/analyze-svg', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ base64: boardImage }),
+  })
   .then(response => response.json())
   .then(data => {
-    // `data.response` is already an un-escaped JS string:
     const latex = data.response.trim();
-    console.log(latex);      // logs: \int_{0}^{\infty} 1 \, dx
-    // now you can copy it directly from the console and paste into your .tex
+    console.log(latex);      
+    // copy it directly from the console and paste into .tex
     const blob = new Blob([latex], { type: 'text/plain' });
 
-    // 3) Create a temporary download link
+    // Create a temporary download link
     const url = URL.createObjectURL(blob);
     const a   = document.createElement('a');
     a.href    = url;
     a.download = 'LaTeX_Answer.tex';  // name of the downloaded file
 
-    // 4) Programmatically click it to trigger download
+    // Programmatically click it to trigger download
     document.body.appendChild(a); // needed for Firefox
     a.click();
 
-    // 5) Clean up
+    // Clean up
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   })
@@ -61,6 +162,8 @@ fetch('http://localhost:3000/analyze-svg', {
 }
 
   // —— state & bindings ——
+
+  lastSvgBase64: string | null = null;
 
   selectedTool: ToolType  = ToolType.Pen;
   options: WhiteboardOptions = {};
@@ -78,8 +181,7 @@ fetch('http://localhost:3000/analyze-svg', {
   private yarray = this.ydoc.getArray<WhiteboardElement>('canvas');
 
   // canvas & style settings
-  canvasWidth        = 8000;
-  canvasHeight       = 6000;
+  canvasWidth        = 800;
   fullScreen         = false;
   strokeColor        = '#333333';
   backgroundColor    = '#F8F9FA';
