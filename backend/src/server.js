@@ -8,6 +8,10 @@ import crypto from 'crypto';
 import session from 'express-session';
 import cors from 'cors';
 import bodyParser from 'body-parser';
+import dotenv from 'dotenv';
+import path from 'path';
+
+dotenv.config({ path: path.resolve('../../.env') });
 
 const app = express();
 const PORT = 3000;
@@ -27,10 +31,9 @@ app.use(express.json({ limit: '25mb' }));
  */
 const oauth2Client = new google.auth.OAuth2(
   "264303411068-fub0t37hgdamhinje112blqarbl2tg9f.apps.googleusercontent.com",
-  "Secret:)",
+  `${process.env.GOOGLE_KEY}`,
   'http://localhost:3000/oauth2callback'
 );
-
 
 // Access scopes for two non-Sign-In scopes: Read-only Drive activity and Google Calendar.
 const scopes = [
@@ -144,7 +147,7 @@ app.get('/oauth2callback', async (req, res) => {
   });
 
 const openai = new OpenAI({
-  apiKey: 'secret',
+  apiKey: `${process.env.OPEN_AI_KEY}`,
 });
 
 app.post('/analyze-svg', async (req, res) => {
