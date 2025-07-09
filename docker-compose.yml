@@ -1,6 +1,6 @@
 services:
   backend:
-    image: ghcr.io/<your_github_username>/backend-boardshowdown:latest
+    image: ghcr.io/utsc-cscc09-programming-on-the-web/backend-boardshowdown:feat-deploy
     container_name: backend-boardshowdown
     env_file:
       - ./.env.production
