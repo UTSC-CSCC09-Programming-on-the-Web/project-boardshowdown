@@ -1,0 +1,13 @@
+services:
+  backend:
+    image: ghcr.io/<your_github_username>/backend-boardshowdown:latest
+    container_name: backend-boardshowdown
+    env_file:
+      - ./.env.production
+    environment:
+      - NODE_ENV=production
+    ports:
+      - "3000:3000"
+    restart: always
+    expose:
+      - 3000

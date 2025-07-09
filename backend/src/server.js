@@ -11,12 +11,20 @@ import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
 import path from 'path';
 
-dotenv.config({ path: path.resolve('../../.env') });
+const envFile =
+  process.env.NODE_ENV === 'production'
+    ? '../../.env.production'
+    : '../../.env';
+
+dotenv.config({ path: path.resolve(envFile) });
+
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:4200';
+const REDIRECT_URI = process.env.REDIRECT_URI || 'http://localhost:3000/oauth2callback';
 
 const app = express();
 const PORT = 3000;
 app.use(cors({
-  origin: 'http://localhost:4200',
+  origin: FRONTEND_URL,
   credentials: true
 }));
 app.use(bodyParser.json({ limit: '25mb' }));
@@ -32,7 +40,7 @@ app.use(express.json({ limit: '25mb' }));
 const oauth2Client = new google.auth.OAuth2(
   "264303411068-fub0t37hgdamhinje112blqarbl2tg9f.apps.googleusercontent.com",
   `${process.env.GOOGLE_KEY}`,
-  'http://localhost:3000/oauth2callback'
+  REDIRECT_URI
 );
 
 // Access scopes for two non-Sign-In scopes: Read-only Drive activity and Google Calendar.
@@ -106,7 +114,7 @@ app.get('/oauth2callback', async (req, res) => {
 
       const { data: profile } = await oauth2.userinfo.get();
       console.log('User email:', profile.email);
-      res.redirect('http://localhost:4200/dashboard');
+      res.redirect(`${FRONTEND_URL}/dashboard`);
 
       // do ur thing here
 
