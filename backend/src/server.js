@@ -10,6 +10,7 @@ import cors from 'cors';
 import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
 import path from 'path';
+import fetch from 'node-fetch';
 
 const envFile =
   process.env.NODE_ENV === 'production'
@@ -29,8 +30,7 @@ app.use(cors({
 }));
 app.use(bodyParser.json({ limit: '25mb' }));
 app.use(express.json({ limit: '25mb' }));
-
-
+globalThis.fetch = fetch;
 
 /**
  * To use OAuth2 authentication, we need access to a CLIENT_ID, CLIENT_SECRET, AND REDIRECT_URI.
