@@ -3,7 +3,7 @@ services:
     image: ghcr.io/utsc-cscc09-programming-on-the-web/backend-boardshowdown:feat-deploy
     container_name: backend-boardshowdown
     env_file:
-      - ./.env.production
+      - .env.production
     environment:
       - NODE_ENV=production
     ports:
