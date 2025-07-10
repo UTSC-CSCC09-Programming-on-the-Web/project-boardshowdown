@@ -163,7 +163,7 @@ app.post('/analyze-svg', async (req, res) => {
   if (!base64) return res.status(400).json({ error: 'Missing base64' });
 
   const dataUri = base64;
-  console.log('Received SVG data URI:', dataUri);
+  //console.log('Received SVG data URI:', dataUri);
 
   try {
     const completion = await openai.chat.completions.create({
