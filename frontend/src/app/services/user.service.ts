@@ -4,6 +4,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { tap } from 'rxjs/operators';
+import { environment } from '../../environments/environment';
 
 export interface User {
   id: number;
@@ -22,10 +23,10 @@ export interface ApiResponse<T> {
   providedIn: 'root'
 })
 export class UserService {
-  private apiUrl = 'http://localhost:3000/api/users';
+  private apiUrl = `${environment.apiEndpoint}/api/users`;
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   private tokenSubject = new BehaviorSubject<string | null>(null);
-  
+
   public currentUser$ = this.currentUserSubject.asObservable();
   public token$ = this.tokenSubject.asObservable();
 
@@ -37,7 +38,7 @@ export class UserService {
   private loadFromStorage(): void {
     const savedUser = localStorage.getItem('currentUser');
     const savedToken = localStorage.getItem('authToken');
-    
+
     if (savedUser && savedToken) {
       try {
         const user = JSON.parse(savedUser);
@@ -84,7 +85,7 @@ export class UserService {
     return this.http.delete(`${this.apiUrl}/${username}`);
   }
 
-  // Sign in 
+  // Sign in
   signIn(credentials: any): Observable<ApiResponse<User>> {
     return this.http.post<ApiResponse<User>>(`${this.apiUrl}/signin`, credentials)
       .pipe(
