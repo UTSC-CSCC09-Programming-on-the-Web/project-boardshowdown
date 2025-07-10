@@ -15,6 +15,7 @@ import {
   ElementType
 } from 'ng-whiteboard';
 import * as Y from 'yjs';
+import { environment } from '../../environments/environment';
 import { WebsocketProvider } from 'y-websocket';
 import { QuestionService, Question } from '../services/question.service';
 
@@ -28,7 +29,7 @@ import { QuestionService, Question } from '../services/question.service';
 export class WhiteboardComponent implements OnInit {
 onSave($event: string) {
 
-fetch('http://localhost:3000/analyze-svg', {
+fetch(`${environment.apiEndpoint}/analyze-svg`, {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({ base64: $event }),
