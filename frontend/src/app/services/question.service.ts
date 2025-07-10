@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment'; // Add this import
 
 export interface Question {
   id: number;
@@ -19,7 +20,7 @@ export interface QuestionResponse {
   providedIn: 'root'
 })
 export class QuestionService {
-  private apiUrl = 'http://localhost:3000/api/question-bank';
+  private apiUrl = `${environment.apiEndpoint}/api/question-bank`;
 
   constructor(private http: HttpClient) {}
 
