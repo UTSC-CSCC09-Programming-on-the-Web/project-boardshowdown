@@ -1,11 +1,10 @@
 # Build the Angular App
-# basically, this compiles the Angular project to static HTML and js files.
-FROM node:18-alpine as build
+FROM node:18-alpine AS build
 WORKDIR /app
-ENV PATH /app/node_modules/.bin:$PATH
+ENV PATH=/app/node_modules/.bin:$PATH
 COPY package.json ./
 COPY package-lock.json ./
-RUN npm ci --silent
+RUN npm ci
 COPY . ./
 RUN npm run build
 
