@@ -1,5 +1,5 @@
 # Build the Angular App
-FROM node:18-alpine AS build
+FROM node:20-alpine AS build
 WORKDIR /app
 ENV PATH=/app/node_modules/.bin:$PATH
 COPY package.json ./
