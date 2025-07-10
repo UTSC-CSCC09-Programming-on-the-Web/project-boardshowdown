@@ -11,6 +11,7 @@ import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
 import path from 'path';
 import fetch, { Headers, Request, Response } from 'node-fetch';
+import Blob from 'fetch-blob';
 
 const envFile =
   process.env.NODE_ENV === 'production'
@@ -34,6 +35,7 @@ globalThis.fetch = fetch;
 globalThis.Headers = Headers;
 globalThis.Request = Request;
 globalThis.Response = Response;
+if (!globalThis.Blob) globalThis.Blob = Blob;
 
 /**
  * To use OAuth2 authentication, we need access to a CLIENT_ID, CLIENT_SECRET, AND REDIRECT_URI.
