@@ -16,6 +16,17 @@ services:
     depends_on:
       - postgres
 
+  frontend:
+    image: ghcr.io/utsc-cscc09-programming-on-the-web/frontend-boardshowdown:feat-deploy
+    container_name: frontend
+    restart: always
+    ports:
+      - "80:80"
+    expose:
+      - 80
+    depends_on:
+      - postgres
+
   postgres:
     image: postgres:15
     container_name: postgres
