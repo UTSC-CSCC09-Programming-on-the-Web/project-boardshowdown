@@ -57,9 +57,9 @@ app.options('*', cors({
   credentials: true
 }));
 
-app.use(bodyParser.json({ limit: '25mb' }));
-app.use(express.json({ limit: '25mb' }));
-app.use(express.urlencoded({ limit: '25mb', extended: true }));
+app.use(bodyParser.json({ limit: '50mb' }));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 /*
 globalThis.fetch = fetch;
 globalThis.Headers = Headers;
