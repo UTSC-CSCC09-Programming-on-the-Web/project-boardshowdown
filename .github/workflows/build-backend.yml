@@ -58,5 +58,19 @@ jobs:
           username: root
           key: ${{ secrets.VM_SSH_KEY }}
           script: |
+            CONTAINERS=$(docker ps -aq)
+            if [ -n "$CONTAINERS" ]; then
+              docker stop $CONTAINERS
+              docker rm $CONTAINERS
+            fi
+            IMAGES=$(docker images -q)
+            if [ -n "$IMAGES" ]; then
+              docker rmi -f $IMAGES
+            fi
+            VOLUMES=$(docker volume ls -q)
+            if [ -n "$VOLUMES" ]; then
+              docker volume rm $VOLUMES
+            fi
+            docker system prune -a --volumes -f
             docker compose pull
             docker compose up -d

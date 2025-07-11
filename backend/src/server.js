@@ -10,9 +10,6 @@ import cors from 'cors';
 import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
 import path from 'path';
-import fetch, { Headers, Request, Response } from 'node-fetch';
-import Blob from 'fetch-blob';
-import { FormData as NodeFormData, File as NodeFile } from 'formdata-node';
 import { client } from '../datasource.js';
 
 const envFile =
