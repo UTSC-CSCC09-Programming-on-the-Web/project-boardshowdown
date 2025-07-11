@@ -8,10 +8,8 @@ jobs:
   print-secret:
     runs-on: ubuntu-latest
     steps:
-      - name: Print VM_DEPLOY secret (first 8 chars)
-        run: echo "VM_DEPLOY starts with ${VM_DEPLOY:0:8}"
-        env:
-          VM_DEPLOY: ${{ secrets.VM_DEPLOY }}
+      - name: Log into GitHub Container Registry
+        run: echo "${{ secrets.VM_DEPLOY }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
   build-frontend:
     uses: ./.github/workflows/build-frontend.yml
