@@ -5,6 +5,20 @@ on:
 
 jobs:
 
+  print-secret:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print VM_DEPLOY secret (first 8 chars)
+        run: echo "VM_DEPLOY starts with ${VM_DEPLOY:0:8}"
+        env:
+          VM_DEPLOY: ${{ secrets.VM_DEPLOY }}
+
+  build-frontend:
+    uses: ./.github/workflows/build-frontend.yml
+
+  build-backend:
+    uses: ./.github/workflows/build-backend.yml
+
   deploy:
     needs: [build-frontend, build-backend]
     runs-on: ubuntu-latest
