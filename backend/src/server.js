@@ -26,8 +26,13 @@ const REDIRECT_URI = process.env.REDIRECT_URI || 'http://localhost:3000/oauth2ca
 
 const app = express();
 const PORT = 3000;
+const allowedOrigins = [
+  'https://boardshowdown.com',
+  'https://api.boardshowdown.com'
+];
+
 app.use(cors({
-  origin: FRONTEND_URL,
+  origin: allowedOrigins,
   credentials: true
 }));
 app.use(bodyParser.json({ limit: '25mb' }));
