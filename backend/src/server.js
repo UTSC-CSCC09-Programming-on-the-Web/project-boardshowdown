@@ -41,14 +41,7 @@ app.use(cors({
 app.use(bodyParser.json({ limit: '25mb' }));
 app.use(express.json({ limit: '25mb' }));
 app.use(express.urlencoded({ limit: '25mb' }));
-/*
-globalThis.fetch = fetch;
-globalThis.Headers = Headers;
-globalThis.Request = Request;
-globalThis.Response = Response;
-if (!globalThis.Blob) globalThis.Blob = Blob;
-if (!globalThis.FormData) globalThis.FormData = NodeFormData;
-if (!globalThis.File) globalThis.File = NodeFile;*/
+
 
 /**
  * To use OAuth2 authentication, we need access to a CLIENT_ID, CLIENT_SECRET, AND REDIRECT_URI.
