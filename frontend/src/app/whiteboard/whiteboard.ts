@@ -19,7 +19,7 @@ import { environment } from '../../environments/environment';
 import { WebsocketProvider } from 'y-websocket';
 import { QuestionService, Question, CheckSolutionResult } from '../services/question.service';
 
-//deploy 2x
+//deploy 3x
 @Component({
   selector: 'app-whiteboard',
   imports: [NgWhiteboardComponent, CommonModule, FormsModule, HttpClientModule],
