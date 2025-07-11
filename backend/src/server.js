@@ -175,6 +175,7 @@ const openai = new OpenAI({
 app.post('/analyze-svg', async (req, res) => {
   const { base64 } = req.body;
   if (!base64) return res.status(400).json({ error: 'Missing base64' });
+  console.log('Received SVG base64');
 
   const dataUri = base64;
   //console.log('Received SVG data URI:', dataUri);
