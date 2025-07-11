@@ -1,4 +1,33 @@
 services:
+  nginx-proxy:
+    image: jwilder/nginx-proxy
+    container_name: nginx-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - ./certs:/etc/nginx/certs
+      - ./vhost:/etc/nginx/vhost.d
+      - ./html:/usr/share/nginx/html
+    restart: always
+
+  nginx-proxy-acme:
+    image: nginxproxy/acme-companion
+    container_name: nginx-proxy-acme
+    depends_on:
+      - nginx-proxy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./certs:/etc/nginx/certs
+      - ./vhost:/etc/nginx/vhost.d
+      - ./html:/usr/share/nginx/html
+      - ./acme:/etc/acme.sh
+    environment:
+      - DEFAULT_EMAIL=ilya.kostin@mail.utoronto.ca
+      - NGINX_PROXY_CONTAINER=nginx-proxy
+    restart: always
+
   backend:
     image: ghcr.io/utsc-cscc09-programming-on-the-web/backend-boardshowdown:feat-deploy
     container_name: backend-boardshowdown
@@ -10,8 +39,11 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=boardshowdown
-    ports:
-      - "3000:3000"
+      - VIRTUAL_HOST=boardshowdown.com
+      - LETSENCRYPT_HOST=boardshowdown.com
+      - LETSENCRYPT_EMAIL=ilya.kostin@mail.utoronto.ca
+    expose:
+      - 3000
     restart: always
     depends_on:
       - postgres
@@ -19,11 +51,13 @@ services:
   frontend:
     image: ghcr.io/utsc-cscc09-programming-on-the-web/frontend-boardshowdown:feat-deploy
     container_name: frontend
-    restart: always
-    ports:
-      - "80:80"
+    environment:
+      - VIRTUAL_HOST=boardshowdown.com
+      - LETSENCRYPT_HOST=boardshowdown.com
+      - LETSENCRYPT_EMAIL=ilya.kostin@mail.utoronto.ca
     expose:
       - 80
+    restart: always
     depends_on:
       - postgres
 
