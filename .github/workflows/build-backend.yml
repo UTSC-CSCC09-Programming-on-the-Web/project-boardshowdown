@@ -51,7 +51,7 @@ jobs:
           docker push $IMAGE_ID:$VERSION
 
 
-      - name: Deploy on server
+      - name: Clear cache
         uses: appleboy/ssh-action@master
         with:
           host: boardshowdown.com
@@ -72,5 +72,3 @@ jobs:
               docker volume rm $VOLUMES
             fi
             docker system prune -a --volumes -f
-            docker compose pull
-            docker compose up -d

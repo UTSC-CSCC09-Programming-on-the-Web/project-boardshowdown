@@ -23,7 +23,6 @@ const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:4200';
 const REDIRECT_URI = process.env.REDIRECT_URI || 'http://localhost:3000/oauth2callback';
 
 const app = express();
-const PORT = 3000;
 const allowedOrigins = [
   'https://boardshowdown.com',
   'https://api.boardshowdown.com'
