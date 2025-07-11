@@ -39,8 +39,8 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=boardshowdown
-      - VIRTUAL_HOST=boardshowdown.com
-      - LETSENCRYPT_HOST=boardshowdown.com
+      - VIRTUAL_HOST=api.boardshowdown.com
+      - LETSENCRYPT_HOST=api.boardshowdown.com
       - LETSENCRYPT_EMAIL=ilya.kostin@mail.utoronto.ca
     expose:
       - 3000
