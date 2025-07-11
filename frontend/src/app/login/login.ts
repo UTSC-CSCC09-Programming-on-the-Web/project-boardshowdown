@@ -1,6 +1,6 @@
 import { Component, signal, computed, OnInit, Output, EventEmitter } from '@angular/core';
 import { FormBuilder, Validators, ReactiveFormsModule, FormGroup, FormControl } from '@angular/forms';
-import { GoogleAuth } from '../google-auth'; // Ensure this path matches your project structure
+import { GoogleAuth } from '../google-auth';
 import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
 import { Router } from '@angular/router';

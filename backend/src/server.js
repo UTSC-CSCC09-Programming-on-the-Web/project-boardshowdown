@@ -123,7 +123,7 @@ app.get('/oauth2callback', async (req, res) => {
       console.log('User email:', profile.email);
       res.redirect(`${FRONTEND_URL}/dashboard`);
 
-      // do ur thing here
+      // do your thing here
 
     }
   });
