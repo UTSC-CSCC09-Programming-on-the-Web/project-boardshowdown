@@ -1,9 +1,7 @@
 name: Deploy Stack
 
 on:
-  push:
-    branches:
-      - feat-deploy
+  push:  # triggers on every push to any branch
 
 jobs:
   build-frontend:
