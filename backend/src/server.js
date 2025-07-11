@@ -32,7 +32,7 @@ const allowedOrigins = [
 ];
 
 app.use(cors({
-  origin: allowedOrigins,
+  origin: 'https://boardshowdown.com',
   credentials: true
 }));
 app.use(bodyParser.json({ limit: '25mb' }));
