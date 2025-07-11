@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiEndpoint: 'https://boardshowdown.com',
+  apiEndpoint: 'https://boardshowdown.com:3000',
 };
