@@ -16,6 +16,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Debug secret length
+        run: echo "Token length: ${#VM_DEPLOY}"
+        env:
+          VM_DEPLOY: ${{ secrets.VM_DEPLOY }}
+
       - name: Build image
         run: docker build . --file Dockerfile --tag $IMAGE_NAME
 
