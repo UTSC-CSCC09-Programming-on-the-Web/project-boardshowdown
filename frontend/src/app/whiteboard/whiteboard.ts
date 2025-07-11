@@ -33,6 +33,7 @@ fetch(`${environment.apiEndpoint}/analyze-svg`, {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({ base64: $event }),
+  credentials: 'include'
 })
   .then(response => response.json())
   .then(data => {
