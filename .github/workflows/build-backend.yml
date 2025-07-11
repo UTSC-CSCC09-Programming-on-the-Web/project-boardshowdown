@@ -9,7 +9,7 @@ on:
       - feat-deploy
     # Only run this workflow if the commit has modified files from frontend
     paths:
-      - '**'
+      - 'backend/**'
 
 env:
   IMAGE_NAME: backend-boardshowdown
@@ -72,3 +72,5 @@ jobs:
               docker volume rm $VOLUMES
             fi
             docker system prune -a --volumes -f
+            docker compose pull
+            docker compose up -d
