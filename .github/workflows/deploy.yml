@@ -4,11 +4,6 @@ on:
   push:  # triggers on every push to any branch
 
 jobs:
-  build-frontend:
-    uses: ./.github/workflows/build-frontend.yml
-
-  build-backend:
-    uses: ./.github/workflows/build-backend.yml
 
   deploy:
     needs: [build-frontend, build-backend]
