@@ -60,7 +60,6 @@ services:
     restart: always
     depends_on:
       - postgres
-      - backend
 
   postgres:
     image: postgres:15

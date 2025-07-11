@@ -1,0 +1,24 @@
+name: Deploy Stack
+
+on:
+  workflow_run:
+    workflows: ["Publish Frontend Server", "Publish Backend Server"]
+    types:
+      - completed
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy on server
+        uses: appleboy/ssh-action@master
+        with:
+          host: boardshowdown.com
+          username: root
+          key: ${{ secrets.VM_SSH_KEY }}
+          script: |
+            cd /path/to/your/project-boardshowdown
+            docker compose down -v
+            docker system prune -a --volumes -f
+            docker compose pull
+            docker compose up -d
