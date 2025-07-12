@@ -1,5 +1,5 @@
 import pg from "pg";
-//deploy 9x
+//deploy 10x
 
 const POSTGRES_DB = process.env.POSTGRES_DB || 'postgres';
 
