@@ -123,7 +123,7 @@ app.get('/oauth2callback', async (req, res) => {
 
       const { data: profile } = await oauth2.userinfo.get();
       console.log('User email:', profile.email);
-      res.redirect(`${FRONTEND_URL}/dashboard`);
+      res.redirect(`${FRONTEND_URL}`);
 
       // do your thing here
 
