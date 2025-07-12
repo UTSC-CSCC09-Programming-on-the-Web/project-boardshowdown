@@ -50,7 +50,7 @@ services:
 
   frontend:
     image: ghcr.io/utsc-cscc09-programming-on-the-web/frontend-boardshowdown:feat-deploy
-    container_name: frontend
+    container_name: frontend-boardshowdown
     environment:
       - VIRTUAL_HOST=boardshowdown.com
       - LETSENCRYPT_HOST=boardshowdown.com
@@ -75,12 +75,13 @@ services:
 
   yjs:
     image: ghcr.io/utsc-cscc09-programming-on-the-web/yjs-boardshowdown:feat-deploy
+    container_name: yjs-boardshowdown
     environment:
       - VIRTUAL_HOST=yjs.boardshowdown.com
       - LETSENCRYPT_HOST=yjs.boardshowdown.com
       - LETSENCRYPT_EMAIL=ilya.kostin@mail.utoronto.ca
-    ports:
-      - "12345:12345"
+    expose:
+      - 12345
     restart: unless-stopped
 
 volumes:
