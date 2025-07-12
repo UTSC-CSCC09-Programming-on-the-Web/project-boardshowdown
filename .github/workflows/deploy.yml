@@ -8,6 +8,7 @@ on:
     paths:
       - 'frontend/**'
       - 'backend/**'
+      - 'yjs/**'
 
 env:
   FRONTEND_IMAGE_NAME: frontend-boardshowdown
@@ -66,9 +67,35 @@ jobs:
           docker tag $BACKEND_IMAGE_NAME $IMAGE_ID:$VERSION
           docker push $IMAGE_ID:$VERSION
 
+  build-yjs:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: yjs
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build yjs image
+        run: docker build . --file Dockerfile --tag yjs-boardshowdown
+
+      - name: Log into GitHub Container Registry
+        run: echo "${{ secrets.VM_DEPLOY }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Push yjs image to GitHub Container Registry
+        run: |
+          IMAGE_ID=ghcr.io/${{ github.repository_owner }}/yjs-boardshowdown
+          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+          [ "$VERSION" == "main" ] && VERSION=latest
+          echo IMAGE_ID=$IMAGE_ID
+          echo VERSION=$VERSION
+          docker tag yjs-boardshowdown $IMAGE_ID:$VERSION
+          docker push $IMAGE_ID:$VERSION
+
   deploy:
     runs-on: ubuntu-latest
-    needs: [build-frontend, build-backend]
+    needs: [build-frontend, build-backend, build-yjs]
     steps:
       - name: Deploy on server
         uses: appleboy/ssh-action@master

@@ -179,7 +179,7 @@ exportLatexCall(boardImage: string) {
   questionError: string | null = null;
 
   private ydoc = new Y.Doc();
-  private provider = new WebsocketProvider('ws://localhost:12345', 'whiteboardd-room', this.ydoc);
+  private provider = new WebsocketProvider(environment.yjsWebsocketUrl, 'whiteboardd-room', this.ydoc);
   private yarray = this.ydoc.getArray<WhiteboardElement>('canvas');
 
   // canvas & style settings

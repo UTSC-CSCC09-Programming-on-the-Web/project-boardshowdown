@@ -73,5 +73,15 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  yjs:
+    image: ghcr.io/utsc-cscc09-programming-on-the-web/yjs-boardshowdown:feat-deploy
+    environment:
+      - VIRTUAL_HOST=yjs.boardshowdown.com
+      - LETSENCRYPT_HOST=yjs.boardshowdown.com
+      - LETSENCRYPT_EMAIL=ilya.kostin@mail.utoronto.ca
+    ports:
+      - "12345:12345"
+    restart: unless-stopped
+
 volumes:
   postgres_data:
