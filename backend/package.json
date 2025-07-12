@@ -8,7 +8,6 @@
     "start:dev": "nodemon src/server.js"
   },
   "dependencies": {
-    "@y/websocket-server": "^0.1.1",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
     "dotenv": "^17.1.0",
@@ -19,10 +18,7 @@
     "node-fetch": "^3.3.2",
     "openai": "^5.8.2",
     "pg": "^8.10.0",
-    "stripe": "^12.0.0",
-    "ws": "^8.18.3",
-    "y-websocket": "^1.4.5",
-    "yjs": "^13.6.27"
+    "stripe": "^12.0.0"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
