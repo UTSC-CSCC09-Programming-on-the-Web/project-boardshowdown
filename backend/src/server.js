@@ -11,7 +11,7 @@ import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
 import path from 'path';
 import { client } from '../datasource.js';
-//deploy 5x
+//deploy 6x
 const envFile =
   process.env.NODE_ENV === 'production'
     ? '../../.env.production'
