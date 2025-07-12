@@ -1,5 +1,5 @@
 export const environment = {
   production: false,
-  apiEndpoint: 'https://boardshowdown.com',
+  apiEndpoint: 'http://localhost:3000',
   yjsWebsocketUrl: 'ws://localhost:12345',
 };

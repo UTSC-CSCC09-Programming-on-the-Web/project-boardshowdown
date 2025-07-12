@@ -25,7 +25,9 @@ const REDIRECT_URI = process.env.REDIRECT_URI || 'http://localhost:3000/oauth2ca
 const app = express();
 const allowedOrigins = [
   'https://boardshowdown.com',
-  'https://api.boardshowdown.com'
+  'https://api.boardshowdown.com',
+  'http://localhost:3000/oauth2callback',
+  'http://localhost:4200'
 ];
 
 app.use(cors({
