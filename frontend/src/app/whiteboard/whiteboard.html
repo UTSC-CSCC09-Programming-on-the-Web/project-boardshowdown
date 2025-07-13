@@ -1,4 +1,18 @@
 <!-- src/app/app.component.html -->
+<!-- overlay shows whenever `loading` is true -->
+<div
+  *ngIf="loading"
+  id="pageLoadingOverlay"
+  class="overlay"
+>
+  <!-- if you want text next to spinner, you can add it here: -->
+
+  <div class="loading-content">
+    <span>  Loading…</span>
+  </div>
+
+</div>
+
 <div class="h-screen flex flex-col">
   <div>
     <h1 class="text-center text-2xl font-bold my-4">Collaborative Whiteboard</h1>

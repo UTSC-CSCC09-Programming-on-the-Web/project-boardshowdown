@@ -28,6 +28,7 @@ import { QuestionService, Question, CheckSolutionResult } from '../services/ques
 export class WhiteboardComponent implements OnInit {
 
    showFeedbackModal = false;
+   loading = false;
   feedback: {
     icon: string;
     status: string;
@@ -49,6 +50,8 @@ export class WhiteboardComponent implements OnInit {
     this.showFeedbackModal = false;
   }
 
+  sleep5 = () => new Promise(resolve => setTimeout(resolve, 5000));
+  
   onSubmitAnswer() {
     this.wb.save(this.FormatType.Base64, 'Board');
 
@@ -58,13 +61,19 @@ export class WhiteboardComponent implements OnInit {
     }
 
     setTimeout(() => {
+      this.loading = true;
       if (!this.lastSvgBase64) {
         console.error('Board export failed');
+        this.loading = false;
         return;
       }
-      this.submitPayload(this.lastSvgBase64);
-    }, 50);
+      // sleep for 5 seconds 
+      // before submitting the answer
 
+      this.submitPayload(this.lastSvgBase64);
+
+    }, 5);
+    
     console.log('Submitting answer for question ID:', this.currentQuestion.id);
   }
   
@@ -105,29 +114,27 @@ private submitPayload(boardImage: string) {
         error: err => {
           console.error('Check failed:', err);
           // optionally show an error state in your modal
+          this.loading = false; // hide spinner or reset modal state
+        },
+        complete: () => {
+          this.loading = false; // hide spinner or reset modal state
         }
       });
   }
 
 
 exportLatex() {
+  this.loading = true;
   this.wb.save(this.FormatType.Base64, 'Board');
 
     setTimeout(() => {
       if (!this.lastSvgBase64) {
         console.error('Board export failed');
+        this.loading = false;
         return;
       }
       this.exportLatexCall(this.lastSvgBase64);
     }, 50);
-
-    
-  this.wb.save(this.FormatType.Base64, 'Board');
-  console.log('Exporting LaTeX...');
-  if (!this.lastSvgBase64) {
-    console.error('No SVG data available to export');
-    return;
-  }
 }
 exportLatexCall(boardImage: string) {
   fetch('http://localhost:3000/analyze-svg', {
@@ -158,6 +165,11 @@ exportLatexCall(boardImage: string) {
   })
   .catch(error => {
     console.error('Error:', error);
+  })
+  .finally(() => {
+    this.loading = false; // hide spinner or reset modal state
+    // give some feedback to the user
+    
   });
 }
 
