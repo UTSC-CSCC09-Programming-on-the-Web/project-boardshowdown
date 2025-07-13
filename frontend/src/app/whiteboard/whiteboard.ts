@@ -15,10 +15,11 @@ import {
   ElementType
 } from 'ng-whiteboard';
 import * as Y from 'yjs';
+import { environment } from '../../environments/environment';
 import { WebsocketProvider } from 'y-websocket';
 import { QuestionService, Question, CheckSolutionResult } from '../services/question.service';
 
-
+//deploy 9x
 @Component({
   selector: 'app-whiteboard',
   imports: [NgWhiteboardComponent, CommonModule, FormsModule, HttpClientModule],
@@ -76,7 +77,7 @@ export class WhiteboardComponent implements OnInit {
     
     console.log('Submitting answer for question ID:', this.currentQuestion.id);
   }
-  
+
 onSave(svgBase64: string) {
   this.lastSvgBase64 = svgBase64;
 }
@@ -136,16 +137,18 @@ exportLatex() {
       this.exportLatexCall(this.lastSvgBase64);
     }, 50);
 }
+  
 exportLatexCall(boardImage: string) {
-  fetch('http://localhost:3000/analyze-svg', {
+  fetch(`${environment.apiEndpoint}/analyze-svg`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ base64: boardImage }),
-  })
+    credentials: 'include'
+})
   .then(response => response.json())
   .then(data => {
     const latex = data.response.trim();
-    console.log(latex);      
+    console.log(latex);
     // copy it directly from the console and paste into .tex
     const blob = new Blob([latex], { type: 'text/plain' });
 
@@ -189,11 +192,12 @@ exportLatexCall(boardImage: string) {
   questionError: string | null = null;
 
   private ydoc = new Y.Doc();
-  private provider = new WebsocketProvider('ws://localhost:12345', 'whiteboardd-room', this.ydoc);
+  private provider = new WebsocketProvider(environment.yjsWebsocketUrl, 'whiteboardd-room', this.ydoc);
   private yarray = this.ydoc.getArray<WhiteboardElement>('canvas');
 
   // canvas & style settings
   canvasWidth        = 800;
+  canvasHeight       = 800;
   fullScreen         = false;
   strokeColor        = '#333333';
   backgroundColor    = '#F8F9FA';

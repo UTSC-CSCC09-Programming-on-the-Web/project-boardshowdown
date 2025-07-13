@@ -1,11 +1,11 @@
 import { Component, signal, computed, OnInit, Output, EventEmitter } from '@angular/core';
 import { FormBuilder, Validators, ReactiveFormsModule, FormGroup, FormControl } from '@angular/forms';
-import { GoogleAuth } from '../google-auth'; // Ensure this path matches your project structure
+import { GoogleAuth } from '../google-auth';
 import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
 import { Router } from '@angular/router';
 // Include user service for user profile management
-import { UserService } from '../services/user.service'; // Adjust the path as necessary
+import { UserService } from '../services/user.service';
 
 @Component({
   selector: 'app-login',
@@ -27,7 +27,7 @@ export class Login implements OnInit {
   loading = signal(false);
 
   constructor(
-    private fb: FormBuilder, 
+    private fb: FormBuilder,
     public auth: GoogleAuth,
     private userService: UserService
   ) {}

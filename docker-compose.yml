@@ -1,0 +1,88 @@
+services:
+  nginx-proxy:
+    image: jwilder/nginx-proxy
+    container_name: nginx-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - ./certs:/etc/nginx/certs
+      - ./vhost:/etc/nginx/vhost.d
+      - ./html:/usr/share/nginx/html
+    restart: always
+
+  nginx-proxy-acme:
+    image: nginxproxy/acme-companion
+    container_name: nginx-proxy-acme
+    depends_on:
+      - nginx-proxy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./certs:/etc/nginx/certs
+      - ./vhost:/etc/nginx/vhost.d
+      - ./html:/usr/share/nginx/html
+      - ./acme:/etc/acme.sh
+    environment:
+      - DEFAULT_EMAIL=ilya.kostin@mail.utoronto.ca
+      - NGINX_PROXY_CONTAINER=nginx-proxy
+    restart: always
+
+  backend:
+    image: ghcr.io/utsc-cscc09-programming-on-the-web/backend-boardshowdown:feat-deploy
+    container_name: backend-boardshowdown
+    env_file:
+      - .env.production
+    environment:
+      - NODE_ENV=production
+      - POSTGRES_HOST=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=boardshowdown
+      - VIRTUAL_HOST=api.boardshowdown.com
+      - LETSENCRYPT_HOST=api.boardshowdown.com
+      - LETSENCRYPT_EMAIL=ilya.kostin@mail.utoronto.ca
+    expose:
+      - 3000
+    restart: always
+    depends_on:
+      - postgres
+
+  frontend:
+    image: ghcr.io/utsc-cscc09-programming-on-the-web/frontend-boardshowdown:feat-deploy
+    container_name: frontend-boardshowdown
+    environment:
+      - VIRTUAL_HOST=boardshowdown.com
+      - LETSENCRYPT_HOST=boardshowdown.com
+      - LETSENCRYPT_EMAIL=ilya.kostin@mail.utoronto.ca
+    expose:
+      - 80
+    restart: always
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=boardshowdown
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  yjs:
+    image: ghcr.io/utsc-cscc09-programming-on-the-web/yjs-boardshowdown:feat-deploy
+    container_name: yjs-boardshowdown
+    environment:
+      - VIRTUAL_HOST=yjs.boardshowdown.com
+      - LETSENCRYPT_HOST=yjs.boardshowdown.com
+      - LETSENCRYPT_EMAIL=ilya.kostin@mail.utoronto.ca
+    expose:
+      - 12345
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

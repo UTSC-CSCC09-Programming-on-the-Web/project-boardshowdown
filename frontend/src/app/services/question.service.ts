@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment'; // Add this import
 
 export interface Question {
   id: number;
@@ -25,8 +26,8 @@ export interface CheckSolutionResult {
   providedIn: 'root'
 })
 export class QuestionService {
-  private apiUrl = 'http://localhost:3000/api/question-bank';
-  private apiUrl2 = 'http://localhost:3000/check-solution-ai';
+  private apiUrl = `${environment.apiEndpoint}/api/question-bank`;
+  private apiUrl2 = `${environment.apiEndpoint}/check-solution-ai`;
 
   constructor(private http: HttpClient) {}
 
