@@ -66,6 +66,7 @@ const scopes = [
  *   For more information on handling refresh tokens,
  *   see https://github.com/googleapis/google-api-nodejs-client#handling-refresh-tokens
  */
+app.set('trust proxy', 1);
 let userCredential = null;
 app.use(session({
     secret: 'test', // Replace with a strong secret
