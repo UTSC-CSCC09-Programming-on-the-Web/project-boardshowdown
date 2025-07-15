@@ -24,9 +24,9 @@ const REDIRECT_URI = process.env.REDIRECT_URI || 'http://localhost:3000/oauth2ca
 
 const app = express();
 const allowedOrigins = [
-  'http://boardshowdown.com',
-  'http://api.boardshowdown.com',
-  'http://localhost:3000/oauth2callback',
+  'https://boardshowdown.com',
+  'https://api.boardshowdown.com',
+  'http://localhost:3000',
   'http://localhost:4200'
 ];
 
@@ -71,6 +71,10 @@ app.use(session({
     secret: 'test', // Replace with a strong secret
     resave: false,
     saveUninitialized: false,
+    cookie: {
+    secure: true,
+    sameSite: 'none'
+    }
   }));
 
 app.get('/auth/google', async (req, res) => {
