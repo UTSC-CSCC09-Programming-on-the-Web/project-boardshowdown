@@ -10,14 +10,18 @@ import cors from 'cors';
 import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import { client } from '../datasource.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 //deploy 9x
 const envFile =
   process.env.NODE_ENV === 'production'
-    ? '../../.env.production'
-    : '../../.env';
+    ? path.join(__dirname, '../../.env.production')
+    : path.join(__dirname, '../../.env');
 
-dotenv.config({ path: path.resolve(envFile) });
+dotenv.config({ path: envFile, override: true });
 
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:4200';
 const REDIRECT_URI = process.env.REDIRECT_URI || 'http://localhost:3000/oauth2callback';
@@ -48,7 +52,7 @@ app.use(express.urlencoded({ limit: '25mb' }));
  */
 const oauth2Client = new google.auth.OAuth2(
   "264303411068-fub0t37hgdamhinje112blqarbl2tg9f.apps.googleusercontent.com",
-  `${process.env.GOOGLE_KEY}`,
+  process.env.GOOGLE_KEY,
   REDIRECT_URI
 );
 
@@ -180,7 +184,7 @@ app.get('/oauth2callback', async (req, res) => {
 ////////////// OPEN AI API Integration //////////////
 
 const openai = new OpenAI({
-  apiKey: `${process.env.OPEN_AI_KEY}`,
+  apiKey: process.env.OPEN_AI_KEY,
 });
 
 
