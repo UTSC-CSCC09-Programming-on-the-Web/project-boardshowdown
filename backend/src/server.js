@@ -11,6 +11,7 @@ import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
 import path from 'path';
 import { client } from '../datasource.js';
+import pgSession from 'connect-pg-simple';
 process.on("uncaughtException", (err) => {
     console.error("🔥 [Uncaught Exception]", err);
 });
@@ -77,7 +78,15 @@ const scopes = [
 app.set('trust proxy', 1);
 let userCredential = null;
 app.use(session({
-    secret: 'test', // Replace with a strong secret
+    store: new (pgSession(session))({
+      conObject: {
+        host: process.env.POSTGRES_HOST || "localhost",
+        user: process.env.POSTGRES_USER || "postgres",
+        password: process.env.POSTGRES_PASSWORD || "postgres",
+        port: process.env.POSTGRES_PORT ? parseInt(process.env.POSTGRES_PORT) : 5432,
+      }
+    }),
+    secret: 'test', // Replace with a strong secret in production!
     resave: false,
     saveUninitialized: false,
     cookie: {
