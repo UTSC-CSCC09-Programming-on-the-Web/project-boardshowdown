@@ -11,4 +11,8 @@ export const client = new pg.Client({
   database: POSTGRES_DB,
 });
 
+client.on('error', (err) => {
+  console.error('🔥 [Postgres Client Error]', err);
+});
+
 await client.connect();

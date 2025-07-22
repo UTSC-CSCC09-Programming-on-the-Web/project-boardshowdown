@@ -11,6 +11,14 @@ import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
 import path from 'path';
 import { client } from '../datasource.js';
+process.on("uncaughtException", (err) => {
+    console.error("🔥 [Uncaught Exception]", err);
+});
+
+  // Unhandled promise rejections (async)
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("⚠️ [Unhandled Rejection]", reason, "Promise:", promise);
+});
 //deploy 9x
 const envFile =
   process.env.NODE_ENV === 'production'
