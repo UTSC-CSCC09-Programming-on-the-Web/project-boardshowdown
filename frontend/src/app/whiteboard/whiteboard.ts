@@ -19,7 +19,7 @@ import { environment } from '../../environments/environment';
 import { WebsocketProvider } from 'y-websocket';
 import { QuestionService, Question, CheckSolutionResult } from '../services/question.service';
 
-//deploy 9x
+//deploy 10x
 @Component({
   selector: 'app-whiteboard',
   imports: [NgWhiteboardComponent, CommonModule, FormsModule, HttpClientModule],
@@ -52,7 +52,7 @@ export class WhiteboardComponent implements OnInit {
   }
 
   sleep5 = () => new Promise(resolve => setTimeout(resolve, 5000));
-  
+
   onSubmitAnswer() {
     this.wb.save(this.FormatType.Base64, 'Board');
 
@@ -68,13 +68,13 @@ export class WhiteboardComponent implements OnInit {
         this.loading = false;
         return;
       }
-      // sleep for 5 seconds 
+      // sleep for 5 seconds
       // before submitting the answer
 
       this.submitPayload(this.lastSvgBase64);
 
     }, 5);
-    
+
     console.log('Submitting answer for question ID:', this.currentQuestion.id);
   }
 
@@ -137,7 +137,7 @@ exportLatex() {
       this.exportLatexCall(this.lastSvgBase64);
     }, 50);
 }
-  
+
 exportLatexCall(boardImage: string) {
   fetch(`${environment.apiEndpoint}/analyze-svg`, {
     method: 'POST',
@@ -172,7 +172,7 @@ exportLatexCall(boardImage: string) {
   .finally(() => {
     this.loading = false; // hide spinner or reset modal state
     // give some feedback to the user
-    
+
   });
 }
 
