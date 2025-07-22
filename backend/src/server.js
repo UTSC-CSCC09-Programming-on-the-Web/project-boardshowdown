@@ -198,6 +198,12 @@ app.get('/oauth2callback', async (req, res) => {
   res.json(profile);
 });
 
+app.get('/test-session', (req, res) => {
+  if (!req.session.views) req.session.views = 1;
+  else req.session.views++;
+  res.json({ views: req.session.views });
+});
+
 
 ////////////// OPEN AI API Integration //////////////
 
