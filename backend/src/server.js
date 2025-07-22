@@ -78,14 +78,6 @@ const scopes = [
 app.set('trust proxy', 1);
 let userCredential = null;
 app.use(session({
-    store: new (pgSession(session))({
-      conObject: {
-        host: process.env.POSTGRES_HOST || "localhost",
-        user: process.env.POSTGRES_USER || "postgres",
-        password: process.env.POSTGRES_PASSWORD || "postgres",
-        port: process.env.POSTGRES_PORT ? parseInt(process.env.POSTGRES_PORT) : 5432,
-      }
-    }),
     secret: 'test', // Replace with a strong secret in production!
     resave: false,
     saveUninitialized: false,
@@ -198,11 +190,6 @@ app.get('/oauth2callback', async (req, res) => {
   res.json(profile);
 });
 
-app.get('/test-session', (req, res) => {
-  if (!req.session.views) req.session.views = 1;
-  else req.session.views++;
-  res.json({ views: req.session.views });
-});
 
 
 ////////////// OPEN AI API Integration //////////////
