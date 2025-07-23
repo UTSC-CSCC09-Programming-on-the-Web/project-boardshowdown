@@ -4,6 +4,7 @@ import http from 'http';
 import https from 'https';
 import url from 'url';
 import { google } from 'googleapis';
+import Stripe from 'stripe';
 import crypto from 'crypto';
 import session from 'express-session';
 import cors from 'cors';
@@ -12,6 +13,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { client } from '../datasource.js';
+import { setSubscriptionActive, setSubscriptionPastDue, setSubscriptionCanceled } from '../queries/subscriptionQueries.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -55,6 +57,8 @@ const oauth2Client = new google.auth.OAuth2(
   process.env.GOOGLE_KEY,
   REDIRECT_URI
 );
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2023-10-16' });
 
 // Access scopes for two non-Sign-In scopes: Read-only Drive activity and Google Calendar.
 const scopes = [
@@ -127,6 +131,23 @@ app.get('/oauth2callback', async (req, res) => {
 
       const { data: profile } = await oauth2.userinfo.get();
       console.log('User email:', profile.email);
+
+      // add user info to database, if user does not exist
+      // Check if user already exists
+      const { userQuery } = await import('../queries/userQuery.js');
+      try {
+        const result = await client.query(userQuery.getUserByEmailQuery, [profile.email]);
+        if (result.rows.length > 0) {
+          console.log('User already exists:', result.rows[0]);
+        }
+        else {
+          // User does not exist, create a new user
+          const newUser = await client.query(userQuery.createUserQuery, [profile.email, '']);
+          console.log('New user created:', newUser.rows[0]);
+        }
+      } catch (error) {
+        console.error('Error checking user existence:', error);
+      }
       res.redirect(`${FRONTEND_URL}`);
 
       // do your thing here
@@ -179,6 +200,104 @@ app.get('/oauth2callback', async (req, res) => {
   const { data: profile } = await oauth2.userinfo.get();
   res.json(profile);
 });
+
+
+//// STRIPE API Integration ////
+
+// ==== STRIPE SUBSCRIPTION CHECKOUT ====
+app.post('/api/create-subscription-checkout', async (req, res) => {
+  // ensure user is logged in
+  if (!req.session.tokens) return res.status(401).send('Login required');
+  const userEmail = req.session.tokens.email; // or fetch from your users table
+
+  // 1) create or fetch Stripe Customer
+  let customerId;
+  // Fetch from DB
+  const { userQuery } = await import('../queries/userQuery.js');
+  try {
+    const result = await client.query('SELECT stripe_customer_id FROM users WHERE email = $1', [userEmail]);
+    customerId = result.rows[0]?.stripe_customer_id;
+  } catch (err) {
+    return res.status(500).send('Database error fetching Stripe customer ID');
+  }
+  if (!customerId) {
+    const customer = await stripe.customers.create({ email: userEmail });
+    customerId = customer.id;
+    // Update users table with new Stripe customer ID
+    try {
+      await client.query(userQuery.setStripeCustomerId, [customerId, userEmail]);
+    } catch (err) {
+      return res.status(500).send('Database error updating Stripe customer ID');
+    }
+  }
+
+  // 2) create Checkout Session
+  const session = await stripe.checkout.sessions.create({
+    mode: 'subscription',
+    payment_method_types: ['card'],
+    customer: customerId,
+    line_items: [{
+      price: 'price_1RmU1mRfn0SZAA4wh3QkNPSI',
+      quantity: 1,
+    }],
+    success_url: `${FRONTEND_URL}/subscribe/success?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url:  `${FRONTEND_URL}/subscribe/cancel`,
+  });
+
+  res.json({ sessionId: session.id });
+});
+
+// ==== STRIPE WEBHOOKS ====
+app.post(
+  '/webhook',
+  bodyParser.raw({ type: 'application/json' }),
+  async (req, res) => {
+    const sig = req.headers['stripe-signature'];
+    let event;
+    try {
+      event = stripe.webhooks.constructEvent(
+        req.body, sig, process.env.STRIPE_WEBHOOK_SECRET
+      );
+    } catch (err) {
+      return res.status(400).send(`Webhook Error: ${err.message}`);
+    }
+
+    const obj = event.data.object;
+    switch (event.type) {
+      case 'checkout.session.completed': {
+        const customerId = obj.customer;
+        try {
+          await client.query(setSubscriptionActive, [customerId]);
+          console.log(`Set subscription_status=active for customer ${customerId}`);
+        } catch (err) {
+          console.error('DB error updating subscription_status to active:', err);
+        }
+        break;
+      }
+      case 'invoice.payment_failed': {
+        const customerId = obj.customer;
+        try {
+          await client.query(setSubscriptionPastDue, [customerId]);
+          console.log(`Set subscription_status=past_due for customer ${customerId}`);
+        } catch (err) {
+          console.error('DB error updating subscription_status to past_due:', err);
+        }
+        break;
+      }
+      case 'customer.subscription.deleted': {
+        const customerId = obj.customer;
+        try {
+          await client.query(setSubscriptionCanceled, [customerId]);
+          console.log(`Set subscription_status=canceled for customer ${customerId}`);
+        } catch (err) {
+          console.error('DB error updating subscription_status to canceled:', err);
+        }
+        break;
+      }
+    }
+    res.json({ received: true });
+  }
+);
 
 
 ////////////// OPEN AI API Integration //////////////
@@ -333,10 +452,14 @@ initializeDatabase()
 app.use("/api/question-bank", questionBankRouter);
 app.use("/api/users", userRouter);
 
+// TODO: modularize this STRIPE API integration + Open AI
+
 // app.listen(PORT, (err) => {
 //   if (err) console.log(err);
 //   else console.log("Backend running on http://localhost:%s", PORT);
 // });
+
+
 
 
 

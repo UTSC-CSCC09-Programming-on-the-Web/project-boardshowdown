@@ -34,6 +34,11 @@ export const userQuery = (function () {
     // For sign in, we'll get user by email and verify password separately
     module.signInUserQuery = `SELECT * FROM Users WHERE email = $1;`;
 
+    module.setStripeCustomerId = `
+      UPDATE users SET stripe_customer_id = $1 WHERE email = $2
+    `;
+    
+
     
     return module;
 

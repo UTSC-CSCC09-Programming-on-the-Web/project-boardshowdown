@@ -6,6 +6,9 @@ import { HttpClientModule } from '@angular/common/http';
 import { Router } from '@angular/router';
 // Include user service for user profile management
 import { UserService } from '../services/user.service';
+// Stripe imports
+import { loadStripe } from '@stripe/stripe-js';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-login',
@@ -29,8 +32,27 @@ export class Login implements OnInit {
   constructor(
     private fb: FormBuilder,
     public auth: GoogleAuth,
-    private userService: UserService
+    private userService: UserService,
+    private http: HttpClient
   ) {}
+  stripePromise = loadStripe('pk_test_51RmTseRfn0SZAA4wfzjIHyEbLtHc0tx0cFhWaJZQHnHqEj9Ff4M4Z1IfTRPgqN90r9rv5kHRTo06B6SrRAhj5wqk00MSaJARsc'); // <-- Replace with your Stripe publishable key
+
+  // Stripe subscription handler
+  async subscribeWithStripe() {
+    try {
+      // Call backend to create a Stripe Checkout session
+      const resp: any = await this.http.post('/api/create-subscription-checkout', {}, { withCredentials: true }).toPromise();
+      const stripe = await this.stripePromise;
+      if (stripe && resp.sessionId) {
+        await stripe.redirectToCheckout({ sessionId: resp.sessionId });
+      } else {
+        this.error.set('Stripe session could not be created.');
+      }
+    } catch (err) {
+      this.error.set('Stripe checkout failed.');
+      console.error('Stripe checkout error:', err);
+    }
+  }
 
   ngOnInit(): void {
     this.loginForm = this.fb.group({

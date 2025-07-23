@@ -60,5 +60,13 @@
     <div class="mt-4 text-green-600 text-sm text-center" *ngIf="success()">
       {{ isSignUpMode() ? 'Sign up successful' : 'Login successful' }}
     </div>
+
+    <button
+      type="button"
+      class="bg-blue-600 text-white px-4 py-2 rounded mt-4 w-full"
+      (click)="subscribeWithStripe()"
+    >
+      Subscribe with Stripe
+    </button>
   </form>
 </div>
