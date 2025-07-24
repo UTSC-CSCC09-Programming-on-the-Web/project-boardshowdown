@@ -78,12 +78,21 @@ const scopes = [
 app.set('trust proxy', 1);
 let userCredential = null;
 app.use(session({
+    store: new (pgSession(session))({
+      conObject: {
+        host: process.env.POSTGRES_HOST || "localhost",
+        user: process.env.POSTGRES_USER || "postgres",
+        password: process.env.POSTGRES_PASSWORD || "postgres",
+        port: process.env.POSTGRES_PORT ? parseInt(process.env.POSTGRES_PORT) : 5432,
+      },
+      createTableIfMissing: true
+    }),
     secret: 'test', // Replace with a strong secret in production!
     resave: false,
     saveUninitialized: false,
     cookie: {
-    secure: true,
-    sameSite: 'none'
+      secure: true,
+      sameSite: 'none'
     }
   }));
 
