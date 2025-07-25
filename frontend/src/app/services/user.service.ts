@@ -3,12 +3,16 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
-import { tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 
 export interface User {
   id: number;
   email: string;
+  username?: string;
+  name?: string;
+  profile_picture?: string;
+  stripe_customer_id?: string;
+  subscription_status?: string;
 }
 
 export interface ApiResponse<T> {
@@ -70,9 +74,14 @@ export class UserService {
     return this.http.get(`${this.apiUrl}/${username}`);
   }
 
-  // Create a new user
-  createUser(userData: any): Observable<ApiResponse<User>> {
-    return this.http.post<ApiResponse<User>>(this.apiUrl, userData);
+  // Get user profile by username
+  getUserByUsername(username: string): Observable<ApiResponse<User>> {
+    return this.http.get<ApiResponse<User>>(`${this.apiUrl}/username/${username}`);
+  }
+
+  // Get user profile by email
+  getUserByEmail(email: string): Observable<ApiResponse<User>> {
+    return this.http.get<ApiResponse<User>>(`${this.apiUrl}/email/${email}`);
   }
 
   // Update user profile
@@ -83,18 +92,6 @@ export class UserService {
   // Delete user profile
   deleteUserProfile(username: string): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${username}`);
-  }
-
-  // Sign in
-  signIn(credentials: any): Observable<ApiResponse<User>> {
-    return this.http.post<ApiResponse<User>>(`${this.apiUrl}/signin`, credentials)
-      .pipe(
-        tap(response => {
-          if (response.success && response.data && response.token) {
-            this.saveToStorage(response.data, response.token);
-          }
-        })
-      );
   }
 
   // Sign out

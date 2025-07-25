@@ -1,12 +1,8 @@
 import { Router } from "express";
 import { client } from "../datasource.js";
 import { userQuery } from "../queries/userQuery.js";
-import bcrypt from "bcrypt";
 
 export const userRouter = Router();
-
-// Salt rounds for bcrypt (10 is a good balance of security and performance)
-const SALT_ROUNDS = 10;
 
 // Get user by ID
 userRouter.get("/:id", async (req, res) => {
@@ -21,13 +17,9 @@ userRouter.get("/:id", async (req, res) => {
         });
         }
         
-        // Remove password from response
-        const userData = { ...result.rows[0] };
-        delete userData.password;
-        
         res.json({
         success: true,
-        data: userData
+        data: result.rows[0]
         });
     } catch (error) {
         console.error("Error fetching user:", error);
@@ -38,30 +30,28 @@ userRouter.get("/:id", async (req, res) => {
     }
     });
 
-// Create a new user
+// Create a new user (for Google OAuth only)
 userRouter.post("/", async (req, res) => {
     try {
-        const { email, password } = req.body;
+        const { email, username, name, profile_picture } = req.body;
         
-        if (!email || !password) {
+        if (!email) {
             return res.status(400).json({
                 success: false,
-                error: "Email and password are required"
+                error: "Email is required"
             });
         }
 
-        // Hash the password with salt
-        const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
-        
-        const result = await client.query(userQuery.createUserQuery, [email, hashedPassword]);
-        
-        // Remove password from response
-        const userData = { ...result.rows[0] };
-        delete userData.password;
+        const result = await client.query(userQuery.createUserQuery, [
+            email,
+            username || null,
+            name || null,
+            profile_picture || null
+        ]);
         
         res.status(201).json({
             success: true,
-            data: userData
+            data: result.rows[0]
         });
     } catch (error) {
         console.error("Error creating user:", error);
@@ -72,23 +62,26 @@ userRouter.post("/", async (req, res) => {
     }
 });
 
-// Update user by ID
+// Update user by ID (for non-password fields only)
 userRouter.put("/:id", async (req, res) => {
     try {
         const { id } = req.params;
-        const { email, password } = req.body;
+        const { email, username, name, profile_picture } = req.body;
         
-        if (!email && !password) {
+        if (!email) {
             return res.status(400).json({
                 success: false,
-                error: "At least one field (email or password) is required"
+                error: "Email is required"
             });
         }
         
-        // Hash the password if it's being updated
-        const hashedPassword = password ? await bcrypt.hash(password, SALT_ROUNDS) : password;
-        
-        const result = await client.query(userQuery.updateUserQuery, [email, hashedPassword, id]);
+        const result = await client.query(userQuery.updateUserQuery, [
+            email,
+            username || null,
+            name || null,
+            profile_picture || null,
+            id
+        ]);
         
         if (result.rowCount === 0) {
             return res.status(404).json({
@@ -97,13 +90,9 @@ userRouter.put("/:id", async (req, res) => {
             });
         }
         
-        // Remove password from response
-        const userData = { ...result.rows[0] };
-        delete userData.password;
-        
         res.json({
             success: true,
-            data: userData
+            data: result.rows[0]
         });
     } catch (error) {
         console.error("Error updating user:", error);
@@ -145,17 +134,10 @@ userRouter.get("/", async (req, res) => {
     try {
         const result = await client.query(userQuery.getAllUsersQuery);
         
-        // Remove passwords from all user objects
-        const usersWithoutPasswords = result.rows.map(user => {
-            const userData = { ...user };
-            delete userData.password;
-            return userData;
-        });
-        
         res.json({
             success: true,
-            data: usersWithoutPasswords,
-            count: usersWithoutPasswords.length
+            data: result.rows,
+            count: result.rows.length
         });
     } catch (error) {
         console.error("Error fetching users:", error);
@@ -178,13 +160,9 @@ userRouter.get("/email/:email", async (req, res) => {
             });
         }
         
-        // Remove password from response
-        const userData = { ...result.rows[0] };
-        delete userData.password;
-        
         res.json({
             success: true,
-            data: userData
+            data: result.rows[0]
         });
     } catch (error) {
         console.error("Error fetching user by email:", error);
@@ -195,53 +173,27 @@ userRouter.get("/email/:email", async (req, res) => {
     }
 });
 
-// sign in user
-userRouter.post("/signin", async (req, res) => {
+// Get user by username
+userRouter.get("/username/:username", async (req, res) => {
     try {
-        const { email, password } = req.body;
-        
-        if (!email || !password) {
-            return res.status(400).json({
-                success: false,
-                error: "Email and password are required"
-            });
-        }
-        
-        // Get user by email
-        const result = await client.query(userQuery.signInUserQuery, [email]);
-        
+        const { username } = req.params;
+        const result = await client.query(userQuery.getUserByUsernameQuery, [username]);
         if (result.rows.length === 0) {
-            return res.status(401).json({
+            return res.status(404).json({
                 success: false,
-                error: "Invalid email or password"
+                error: "User not found"
             });
         }
-        
-        const user = result.rows[0];
-        
-        // Compare the provided password with the hashed password
-        const passwordMatch = await bcrypt.compare(password, user.password);
-        
-        if (!passwordMatch) {
-            return res.status(401).json({
-                success: false,
-                error: "Invalid email or password"
-            });
-        }
-        
-        // Remove password from response
-        const userData = { ...user };
-        delete userData.password;
         
         res.json({
             success: true,
-            data: userData
+            data: result.rows[0]
         });
     } catch (error) {
-        console.error("Error signing in user:", error);
+        console.error("Error fetching user by username:", error);
         res.status(500).json({
             success: false,
-            error: "Failed to sign in user"
+            error: "Failed to fetch user by username"
         });
     }
 });

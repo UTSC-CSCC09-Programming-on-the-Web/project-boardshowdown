@@ -131,6 +131,10 @@ app.get('/oauth2callback', async (req, res) => {
 
       const { data: profile } = await oauth2.userinfo.get();
       console.log('User email:', profile.email);
+      console.log('User profile:', profile);
+      console.log('User profile picture:', profile.picture);
+      console.log('User name:', profile.name);
+      
 
       // add user info to database, if user does not exist
       // Check if user already exists
@@ -142,7 +146,51 @@ app.get('/oauth2callback', async (req, res) => {
         }
         else {
           // User does not exist, create a new user
-          const newUser = await client.query(userQuery.createUserQuery, [profile.email, '']);
+          // Extract username from profile.name if it exists in parentheses
+          let username = null;
+          
+          if (profile.name) {
+            // Look for username in parentheses: "First Last (username)"
+            const usernameMatch = profile.name.match(/\(([^)]+)\)$/);
+            if (usernameMatch) {
+              username = usernameMatch[1].toLowerCase().replace(/[^a-zA-Z0-9]/g, '');
+            }
+          }
+          
+          // Fallback: if no username in parentheses, extract from email
+          if (!username) {
+            const baseUsername = profile.email.split('@')[0].replace(/[^a-zA-Z0-9]/g, '');
+            username = baseUsername.toLowerCase();
+          }
+          
+          // Ensure username is not empty and has minimum length
+          if (!username || username.length < 3) {
+            username = `user${Date.now()}`;
+          }
+          
+          // Check if username already exists, if so, add a random number
+          let uniqueUsername = username;
+          let attempts = 0;
+          while (attempts < 5) {
+            const existingUsername = await client.query(userQuery.getUserByUsernameQuery, [uniqueUsername]);
+            if (existingUsername.rows.length === 0) {
+              break; // Username is unique
+            }
+            uniqueUsername = `${username}${Math.floor(Math.random() * 10000)}`;
+            attempts++;
+          }
+
+          // get name as profile.given_name + profile.family_name
+          const name = profile.given_name && profile.family_name
+            ? `${profile.given_name} ${profile.family_name}`
+            : profile.name || null; 
+          
+          const newUser = await client.query(userQuery.createUserQuery, [
+            profile.email,
+            uniqueUsername,
+            name || null,
+            profile.picture || null
+          ]);
           console.log('New user created:', newUser.rows[0]);
         }
       } catch (error) {

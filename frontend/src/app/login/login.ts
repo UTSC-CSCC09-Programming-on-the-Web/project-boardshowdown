@@ -1,11 +1,7 @@
-import { Component, signal, computed, OnInit, Output, EventEmitter } from '@angular/core';
-import { FormBuilder, Validators, ReactiveFormsModule, FormGroup, FormControl } from '@angular/forms';
+import { Component, signal, OnInit, Output, EventEmitter } from '@angular/core';
 import { GoogleAuth } from '../google-auth';
 import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
-import { Router } from '@angular/router';
-// Include user service for user profile management
-import { UserService } from '../services/user.service';
 // Stripe imports
 import { loadStripe } from '@stripe/stripe-js';
 import { HttpClient } from '@angular/common/http';
@@ -13,29 +9,22 @@ import { HttpClient } from '@angular/common/http';
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [ReactiveFormsModule, CommonModule, HttpClientModule],
+  imports: [CommonModule, HttpClientModule],
   templateUrl: `./login.html`,
 })
 export class Login implements OnInit {
-  loginForm!: FormGroup<{
-    email: FormControl<string | null>;
-    password: FormControl<string | null>;
-  }>;
   loggedIn = false;
   userProfile: any = null;
 
   @Output() loginSuccess = new EventEmitter<void>();
 
-  isSignUpMode = signal(false);
   loading = signal(false);
 
   constructor(
-    private fb: FormBuilder,
     public auth: GoogleAuth,
-    private userService: UserService,
     private http: HttpClient
   ) {}
-  stripePromise = loadStripe('pk_test_51RmTseRfn0SZAA4wfzjIHyEbLtHc0tx0cFhWaJZQHnHqEj9Ff4M4Z1IfTRPgqN90r9rv5kHRTo06B6SrRAhj5wqk00MSaJARsc'); // <-- Replace with your Stripe publishable key
+  stripePromise = loadStripe('pk_test_51RmTseRfn0SZAA4wfzjIHyEbLtHc0tx0cFhWaJZQHnHqEj9Ff4M4Z1IfTRPgqN90r9rv5kHRTo06B6SrRAhj5wqk00MSaJARsc');
 
   // Stripe subscription handler
   async subscribeWithStripe() {
@@ -55,11 +44,6 @@ export class Login implements OnInit {
   }
 
   ngOnInit(): void {
-    this.loginForm = this.fb.group({
-      email: ['', [Validators.required]],
-      password: ['', [Validators.required]],
-    });
-
     this.auth.getUserInfo().subscribe({
       next: () => this.loginSuccess.emit(),
       error: () => {}
@@ -67,108 +51,6 @@ export class Login implements OnInit {
   }
   error = signal('');
   success = signal(false);
-
-  isFormValid = computed(() => {
-    if (!this.loginForm) return false;
-    return this.loginForm.valid;
-  });
-
-  toggleMode() {
-    this.isSignUpMode.update(v => !v);
-    this.success.set(false);
-    this.error.set('');
-    this.loading.set(false);
-    this.loginForm.reset();
-  }
-
-  // login using userService api
-  login() {
-    const { email, password } = this.loginForm.value;
-
-    // Clear previous messages
-    this.error.set('');
-    this.success.set(false);
-
-    // Validate inputs
-    if (!email || !email.trim()) {
-      this.error.set('Email is required');
-      return;
-    }
-
-    if (!password || !password.trim()) {
-      this.error.set('Password is required');
-      return;
-    }
-
-    // Basic email format check
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email.trim())) {
-      this.error.set('Please enter a valid email address');
-      return;
-    }
-
-    this.loading.set(true);
-
-    if (this.isSignUpMode()) {
-      // Sign up mode - create new user
-      this.userService.createUser({ email: email.trim(), password }).subscribe({
-        next: (response) => {
-          this.loading.set(false);
-          if (response.success) {
-            this.success.set(true);
-            this.error.set('');
-            // Automatically sign in after successful signup
-            setTimeout(() => {
-              this.performSignIn(email.trim(), password);
-            }, 1000);
-          } else {
-            this.success.set(false);
-            this.error.set(response.error || 'Failed to create account');
-          }
-        },
-        error: (error) => {
-          this.loading.set(false);
-          this.success.set(false);
-          console.error('Signup error:', error);
-          if (error.error?.error) {
-            this.error.set(error.error.error);
-          } else {
-            this.error.set('Failed to create account. Please try again.');
-          }
-        }
-      });
-    } else {
-      // Login mode
-      this.performSignIn(email.trim(), password);
-    }
-  }
-
-  private performSignIn(email: string, password: string) {
-    this.userService.signIn({ email, password }).subscribe({
-      next: (response) => {
-        this.loading.set(false);
-        if (response.success && response.data) {
-          this.success.set(true);
-          this.error.set('');
-          this.userProfile = response.data;
-          this.loggedIn = true;
-          this.loginSuccess.emit();
-        } else {
-          this.success.set(false);
-          this.error.set('Invalid email or password');
-        }
-      },
-      error: (error) => {
-        this.loading.set(false);
-        this.success.set(false);
-        if (error.status === 401) {
-          this.error.set('Invalid email or password');
-        } else {
-          this.error.set('Login failed. Please try again.');
-        }
-      }
-    });
-  }
 
   loginWithGoogle() {
     this.auth.login();
@@ -183,6 +65,5 @@ export class Login implements OnInit {
     this.userProfile = null;
     this.success.set(false);
     this.error.set('');
-    this.loginForm.reset();
   }
 }
