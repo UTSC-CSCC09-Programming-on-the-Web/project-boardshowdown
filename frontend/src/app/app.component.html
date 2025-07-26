@@ -1,2 +1,17 @@
 <app-login *ngIf="!loggedIn" (loginSuccess)="handleLoginSuccess()"></app-login>
-<app-whiteboard *ngIf="loggedIn"></app-whiteboard>
+
+<div *ngIf="loggedIn">
+  <!-- Header with logout button -->
+  <header class="bg-white border-b border-gray-200 px-4 py-3 flex justify-between items-center">
+    <h1 class="text-xl font-semibold text-gray-800">BoardShowdown</h1>
+    <button
+      (click)="handleLogout()"
+      class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded text-sm font-medium transition"
+    >
+      Sign Out
+    </button>
+  </header>
+  
+  <!-- Main content -->
+  <app-whiteboard></app-whiteboard>
+</div>
