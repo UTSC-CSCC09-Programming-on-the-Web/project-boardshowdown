@@ -111,6 +111,6 @@ jobs:
             docker compose down
             docker system prune -a --volumes -f
             docker compose pull
-            docker compose up -d
+            docker compose --env-file .env.production up -d
         env:
           VM_DEPLOY: ${{ secrets.VM_DEPLOY }}
