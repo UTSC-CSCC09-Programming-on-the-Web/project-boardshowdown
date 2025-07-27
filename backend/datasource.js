@@ -3,10 +3,11 @@ import pg from "pg";
 
 
 export const client = new pg.Client({
-  host: process.env.POSTGRES_HOST || "localhost",
-  user: process.env.POSTGRES_USER || "postgres",
-  password: process.env.POSTGRES_PASSWORD || "postgres",
-  port: process.env.POSTGRES_PORT ? parseInt(process.env.POSTGRES_PORT) : 5432,
+  host: process.env.POSTGRES_HOST,
+  user: process.env.POSTGRES_USER,
+  password: process.env.POSTGRES_PASSWORD,
+  database: process.env.POSTGRES_DB,
+  port: 5432,
 });
 
 client.on('error', (err) => {

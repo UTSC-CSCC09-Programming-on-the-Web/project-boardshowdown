@@ -56,7 +56,7 @@ app.use(express.urlencoded({ limit: '25mb' }));
  * https://console.cloud.google.com/apis/credentials.
  */
 const oauth2Client = new google.auth.OAuth2(
-  "264303411068-fub0t37hgdamhinje112blqarbl2tg9f.apps.googleusercontent.com",
+  `${process.env.CLIENTID}`,
   `${process.env.GOOGLE_KEY}`,
   REDIRECT_URI
 );
@@ -80,14 +80,15 @@ let userCredential = null;
 app.use(session({
     store: new (pgSession(session))({
       conObject: {
-        host: process.env.POSTGRES_HOST || "localhost",
-        user: process.env.POSTGRES_USER || "postgres",
-        password: process.env.POSTGRES_PASSWORD || "postgres",
-        port: process.env.POSTGRES_PORT ? parseInt(process.env.POSTGRES_PORT) : 5432,
+        host: process.env.POSTGRES_HOST,
+        user: process.env.POSTGRES_USER,
+        password: process.env.POSTGRES_PASSWORD,
+        database: process.env.POSTGRES_DB,
+        port: 5432,
       },
       createTableIfMissing: true
     }),
-    secret: 'test', // Replace with a strong secret in production!
+    secret: `${process.env.SESSION_SECRET}`, // Replace with a strong secret in production!
     resave: false,
     saveUninitialized: false,
     cookie: {
