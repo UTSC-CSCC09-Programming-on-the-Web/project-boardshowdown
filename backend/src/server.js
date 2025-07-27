@@ -20,7 +20,7 @@ process.on("uncaughtException", (err) => {
 process.on("unhandledRejection", (reason, promise) => {
   console.error("⚠️ [Unhandled Rejection]", reason, "Promise:", promise);
 });
-//deploy 10x
+//deploy 11x
 const envFile =
   process.env.NODE_ENV === 'production'
     ? '../../.env.production'
