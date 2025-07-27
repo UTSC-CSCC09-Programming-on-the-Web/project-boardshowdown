@@ -56,7 +56,7 @@ app.use(express.urlencoded({ limit: '25mb' }));
  * https://console.cloud.google.com/apis/credentials.
  */
 const oauth2Client = new google.auth.OAuth2(
-  "264303411068-fub0t37hgdamhinje112blqarbl2tg9f.apps.googleusercontent.com",
+  process.env.GOOGLE_PUBLIC,
   `${process.env.GOOGLE_KEY}`,
   REDIRECT_URI
 );
@@ -91,8 +91,8 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: true,
-      sameSite: 'none'
+      secure: false,
+      sameSite: 'lax'
     }
   }));
 
@@ -102,6 +102,7 @@ app.get('/auth/google', async (req, res) => {
     // Store state in the session
     console.log('HEREEE');
     req.session.state = state;
+    console.log('Session state:', req.session.state);
 
     // Generate a url that asks permissions for the Drive activity and Google Calendar scope
     const authorizationUrl = oauth2Client.generateAuthUrl({
@@ -115,13 +116,15 @@ app.get('/auth/google', async (req, res) => {
       // Include the state parameter to reduce the risk of CSRF attacks.
       state: state
     });
-
+    console.log('Authorization URL:', authorizationUrl);
     res.redirect(authorizationUrl);
   });
 
 app.get('/oauth2callback', async (req, res) => {
     // Handle the OAuth 2.0 server response
     let q = url.parse(req.url, true).query;
+    console.log("Q state:", q.state);
+    console.log("Session state:", req.session.state);
 
     if (q.error) { // An error response e.g. error=access_denied
       console.log('Error:' + q.error);

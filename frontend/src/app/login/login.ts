@@ -19,7 +19,6 @@ export class Login implements OnInit {
   loggedIn = false;
   userProfile: any = null;
 
-  @Output() loginSuccess = new EventEmitter<void>();
 
   isSignUpMode = signal(false);
   loading = signal(false);
@@ -27,7 +26,8 @@ export class Login implements OnInit {
   constructor(
     private fb: FormBuilder,
     public auth: GoogleAuth,
-    private userService: UserService
+    private userService: UserService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -36,8 +36,9 @@ export class Login implements OnInit {
       password: ['', [Validators.required]],
     });
 
+    // If already authenticated, redirect to RoomSelect
     this.auth.getUserInfo().subscribe({
-      next: () => this.loginSuccess.emit(),
+      next: () => this.router.navigate(['/dashboard']),
       error: () => {}
     });
   }
@@ -128,7 +129,7 @@ export class Login implements OnInit {
           this.error.set('');
           this.userProfile = response.data;
           this.loggedIn = true;
-          this.loginSuccess.emit();
+          this.router.navigate(['/dashboard']);
         } else {
           this.success.set(false);
           this.error.set('Invalid email or password');
@@ -148,6 +149,7 @@ export class Login implements OnInit {
 
   loginWithGoogle() {
     this.auth.login();
+
   }
 
   logoutGoogle() {
