@@ -59,15 +59,13 @@ services:
     expose:
       - 80
     restart: always
-
+#remove the postgres ports
   postgres:
     image: postgres:15
     container_name: postgres
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-    ports:
-      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: always

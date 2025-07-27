@@ -1,0 +1,14 @@
+<div class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-40">
+    <div class="bg-white rounded p-4 w-full max-w-md relative">
+    <button (click)="close()" class="absolute top-2 right-2 text-gray-500 text-xl">&times;</button>
+    <h3 class="text-lg font-bold mb-3 text-center">Leaderboard</h3>
+    <ul *ngIf="leaders?.length" class="max-h-64 overflow-y-auto">
+        <li *ngFor="let leader of leaders; let i = index" class="flex justify-between py-1 border-b last:border-b-0">
+        <span>{{ i + 1 }}.</span>
+        <span>{{ leader.name }}</span>
+        <span>{{ leader.score }}</span>
+        </li>
+    </ul>
+    <div *ngIf="!leaders || !leaders.length" class="text-gray-400 text-center mt-2">No leaders yet.</div>
+    </div>
+</div>

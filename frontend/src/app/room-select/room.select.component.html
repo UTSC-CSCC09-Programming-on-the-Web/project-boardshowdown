@@ -1,0 +1,91 @@
+<div class="min-h-screen bg-gray-50 relative">
+  <!-- Leaderboard Button (fixed to top right of the page) -->
+  <button
+    (click)="openLeaderboard()"
+    class="fixed top-8 right-8 bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded z-30"
+    title="Show Leaderboard"
+  >
+    🏆
+  </button>
+
+  <div class="flex items-center justify-center min-h-screen">
+    <div class="bg-white rounded p-6 w-full max-w-md mt-10 relative">
+      <h2 class="text-2xl font-bold mb-6 text-center">Select a Room</h2>
+      <div class="flex justify-end mb-4">
+        <button
+          type="button"
+          (click)="toggleMode()"
+          class="bg-gray-200 text-gray-700 px-3 py-2 rounded hover:bg-gray-300"
+          [title]="mode === 'create' ? 'Switch to Join/Search' : 'Switch to Create'"
+        >
+          {{ mode === 'create' ? 'Join/Search' : 'Create' }}
+        </button>
+      </div>
+
+      <!-- Create Room Mode -->
+      <form *ngIf="mode === 'create'" (ngSubmit)="createRoom()" class="flex flex-col gap-3 mb-6">
+        <label for="newRoom">Room Name</label>
+        <input
+          [(ngModel)]="newRoom"
+          name="newRoom"
+          id="newRoom"
+          type="text"
+          placeholder="Enter new room name"
+          class="border rounded px-3 py-2"
+          required
+        />
+        <button
+          type="submit"
+          class="bg-blue-600 text-white rounded px-4 py-2 hover:bg-blue-700"
+          title="Create Room"
+        >
+          Create Room
+        </button>
+      </form>
+
+      <!-- Search Mode -->
+      <div *ngIf="mode === 'search'">
+        <div class="relative mb-4">
+          <input
+            [(ngModel)]="searchTerm"
+            name="searchTerm"
+            type="text"
+            placeholder="Search for a room"
+            class="w-full pl-8 pr-2 py-2 border rounded"
+          />
+          <span class="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2" fill="none"/>
+              <line x1="16.5" y1="16.5" x2="21" y2="21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </span>
+        </div>
+        <ul class="mb-4 max-h-64 overflow-y-auto">
+          <li *ngFor="let room of filteredRooms()" class="flex items-center justify-between">
+            <button
+              (click)="goToRoom(room)"
+              class="flex-1 text-left px-2 py-1 rounded hover:bg-blue-100"
+            >
+              {{ room }}
+            </button>
+            <button
+              (click)="deleteRoom(room); $event.stopPropagation();"
+              class="ml-2 text-red-500 hover:text-red-700"
+              title="Delete room"
+            >
+              &#10005;
+            </button>
+          </li>
+        </ul>
+        <div *ngIf="filteredRooms().length === 0" class="text-gray-400 text-center">No rooms found.</div>
+      </div>
+
+      <!-- Leaderboard Modal -->
+      <app-room-leaderboard
+        *ngIf="showLeaderboard"
+        [leaders]="scoreService.getLeaders() | async"
+        [close]="closeLeaderboard"
+      ></app-room-leaderboard>
+    </div>
+  </div>
+</div>

@@ -1,8 +1,8 @@
 // src/app/app.component.ts
-import { Component, OnInit }             from '@angular/core';
+import { Component, OnInit, Input, SimpleChanges, OnChanges } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { FormsModule }           from '@angular/forms';
 import { CommonModule }          from '@angular/common';
-import { HttpClientModule }      from '@angular/common/http';
 import {
   NgWhiteboardComponent,
   NgWhiteboardService,
@@ -11,8 +11,7 @@ import {
   ToolType,
   FormatType,
   LineJoin,
-  LineCap,
-  ElementType
+  LineCap
 } from 'ng-whiteboard';
 import * as Y from 'yjs';
 import { environment } from '../../environments/environment';
@@ -22,11 +21,13 @@ import { QuestionService, Question, CheckSolutionResult } from '../services/ques
 //deploy 10x
 @Component({
   selector: 'app-whiteboard',
-  imports: [NgWhiteboardComponent, CommonModule, FormsModule, HttpClientModule],
+  standalone: true,
+  imports: [NgWhiteboardComponent, CommonModule, FormsModule],
   templateUrl: './whiteboard.html',
   styleUrls: ['./whiteboard.css']
 })
-export class WhiteboardComponent implements OnInit {
+export class WhiteboardComponent implements OnInit, OnChanges {
+  @Input() yjsRoom: string = 'whiteboardd-room';
 
    showFeedbackModal = false;
    loading = false;
@@ -192,8 +193,40 @@ exportLatexCall(boardImage: string) {
   questionError: string | null = null;
 
   private ydoc = new Y.Doc();
-  private provider = new WebsocketProvider(environment.yjsWebsocketUrl, 'whiteboardd-room', this.ydoc);
-  private yarray = this.ydoc.getArray<WhiteboardElement>('canvas');
+  private provider!: WebsocketProvider;
+  private yarray!: Y.Array<WhiteboardElement>;
+
+  constructor(
+    private wb: NgWhiteboardService,
+    private questionService: QuestionService,
+    private route: ActivatedRoute
+  ) {}
+
+  ngOnInit(): void {
+    this.yjsRoom = this.route.snapshot.paramMap.get('room') || 'whiteboardd-room';
+    this.initYjsProvider();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['yjsRoom'] && !changes['yjsRoom'].firstChange) {
+      this.initYjsProvider();
+    }
+  }
+
+  private initYjsProvider() {
+    this.ydoc = new Y.Doc();
+    this.provider = new WebsocketProvider(
+      environment.yjsWebsocketUrl,
+      this.yjsRoom,
+      this.ydoc
+    );
+    this.yarray = this.ydoc.getArray<WhiteboardElement>('canvas');
+    this.yarray.observe(() => {
+      this.data = this.yarray.toArray();
+    });
+    this.data = this.yarray.toArray();
+    console.log('Yjs provider initialized for room:', this.yjsRoom);
+  }
 
   // canvas & style settings
   canvasWidth        = 800;
@@ -219,8 +252,6 @@ exportLatexCall(boardImage: string) {
   LineJoin = LineJoin;
   LineCap  = LineCap;
   FormatType = FormatType;
-
-  constructor(private wb: NgWhiteboardService, private questionService: QuestionService) {}
 
   setTool(tool: ToolType)     { this.selectedTool = tool; this.wb.setActiveTool(tool); }
   undo()                      { this.wb.undo(); }
@@ -287,17 +318,7 @@ exportLatexCall(boardImage: string) {
   onReady()                   { console.log('Whiteboard ready!'); }
 
 
-ngOnInit(): void {
-  //this.data = this.yarray.toArray();
-  this.yarray.observe(() => {
-  const elements = this.yarray.toArray();
-  this.data = elements;
-});
-
-
-}
-
-onDataChange(d: WhiteboardElement[]) {
+  onDataChange(d: WhiteboardElement[]) {
  this.overrideCanvasData(d)
 
 }
@@ -320,8 +341,5 @@ onDataChange(d: WhiteboardElement[]) {
   this.yarray.delete(0, this.yarray.length);
   this.yarray.push(newElements);
 }
-
-
-
 
 }

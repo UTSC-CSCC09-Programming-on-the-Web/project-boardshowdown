@@ -2,15 +2,13 @@ import { Component, signal, computed, OnInit, Output, EventEmitter } from '@angu
 import { FormBuilder, Validators, ReactiveFormsModule, FormGroup, FormControl } from '@angular/forms';
 import { GoogleAuth } from '../google-auth';
 import { CommonModule } from '@angular/common';
-import { HttpClientModule } from '@angular/common/http';
 import { Router } from '@angular/router';
-// Include user service for user profile management
 import { UserService } from '../services/user.service';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [ReactiveFormsModule, CommonModule, HttpClientModule],
+  imports: [ReactiveFormsModule, CommonModule],
   templateUrl: `./login.html`,
 })
 export class Login implements OnInit {
