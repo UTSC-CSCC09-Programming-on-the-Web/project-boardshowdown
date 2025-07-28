@@ -17,12 +17,13 @@ import * as Y from 'yjs';
 import { environment } from '../../environments/environment';
 import { WebsocketProvider } from 'y-websocket';
 import { QuestionService, Question, CheckSolutionResult } from '../services/question.service';
+import { HeaderComponent } from '../header/header.component';
 
 //deploy 10x
 @Component({
   selector: 'app-whiteboard',
   standalone: true,
-  imports: [NgWhiteboardComponent, CommonModule, FormsModule],
+  imports: [NgWhiteboardComponent, CommonModule, FormsModule, HeaderComponent],
   templateUrl: './whiteboard.html',
   styleUrls: ['./whiteboard.css']
 })

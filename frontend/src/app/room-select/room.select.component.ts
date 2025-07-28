@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { RoomLeaderboardComponent } from '../leaderboard/leaderboard.component';
 import { ScoreService } from '../services/leaderboard.service';
+import { HeaderComponent } from '../header/header.component';
 
 @Component({
   selector: 'app-room-select',
   standalone: true,
-  imports: [FormsModule, CommonModule, RoomLeaderboardComponent],
+  imports: [FormsModule, CommonModule, RoomLeaderboardComponent, HeaderComponent],
   templateUrl: './room.select.component.html',
 })
 export class RoomSelectComponent {

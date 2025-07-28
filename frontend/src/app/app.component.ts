@@ -5,6 +5,8 @@ import { WhiteboardComponent } from "./whiteboard/whiteboard";
 import { Login } from "./login/login";
 import { Router, RouterOutlet } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { HttpClientModule } from '@angular/common/http';
+import { GoogleAuth } from './google-auth';
 
 @Component({
   selector: 'app-root',
@@ -14,24 +16,6 @@ import { FormsModule } from '@angular/forms';
   styleUrls: ['./app.component.css'],
 })
 export class AppComponent {
-  loggedIn = false;
 
-  yjsRooms = [
-    'whiteboardd-room',
-    'room-2',
-    'room-3'
-  ];
-  currentYjsRoomIndex = 0;
 
-  get currentYjsRoom() {
-    return this.yjsRooms[this.currentYjsRoomIndex];
-  }
-
-  handleLoginSuccess() {
-    this.loggedIn = true;
-  }
-
-  toggleYjsRoom() {
-    this.currentYjsRoomIndex = (this.currentYjsRoomIndex + 1) % this.yjsRooms.length;
-  }
 }

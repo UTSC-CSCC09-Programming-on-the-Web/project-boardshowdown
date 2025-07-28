@@ -16,10 +16,8 @@ export class GoogleAuth {
     window.location.href = `${this.apiUrl}/auth/google`;
   }
 
-  logout(): void {
-    this.http.get(`${this.apiUrl}/logout`, { withCredentials: true }).subscribe(() => {
-      console.log('Logged out from server');
-    });
+  logout(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/logout`, { withCredentials: true });
   }
 
   getUserInfo(): Observable<any> {
