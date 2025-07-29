@@ -750,6 +750,43 @@ app.post('/api/create-attempt', async (req, res) => {
   }
 });
 
+// Get leaderboard based on attempt scores
+app.get('/api/leaderboard', async (req, res) => {
+  try {
+    // Get user scores by summing all their attempt scores
+    const leaderboardResult = await client.query(`
+      SELECT 
+        u.id,
+        u.name,
+        u.username,
+        u.profile_picture,
+        COALESCE(SUM(a.score), 0) as total_score,
+        COUNT(CASE WHEN a.is_correct = true AND a.score > 0 THEN 1 END) as correct_attempts,
+        COUNT(a.id) as total_attempts
+      FROM users u
+      LEFT JOIN attempts a ON u.id = a.user_id
+      GROUP BY u.id, u.name, u.username, u.profile_picture
+      ORDER BY total_score DESC, correct_attempts DESC
+      LIMIT 50
+    `);
+    
+    const leaderboard = leaderboardResult.rows.map(row => ({
+      id: row.id,
+      name: row.name || row.username,
+      username: row.username,
+      profilePicture: row.profile_picture,
+      score: parseInt(row.total_score),
+      correctAttempts: parseInt(row.correct_attempts),
+      totalAttempts: parseInt(row.total_attempts)
+    }));
+    
+    return res.json({ success: true, data: leaderboard });
+  } catch (err) {
+    console.error('leaderboard error:', err);
+    return res.status(500).json({ error: 'Failed to fetch leaderboard data' });
+  }
+});
+
 app.post('/check-solution-ai', async (req, res) => {
   const { base64, questionId } = req.body;
   if (!base64 || !questionId) {

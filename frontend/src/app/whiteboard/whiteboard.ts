@@ -19,6 +19,7 @@ import { WebsocketProvider } from 'y-websocket';
 import { QuestionService, Question, CheckSolutionResult, AttemptResult } from '../services/question.service';
 import { HeaderComponent } from '../header/header.component';
 import { GoogleAuth } from '../google-auth';
+import { ScoreService } from '../services/leaderboard.service';
 
 //deploy 10x
 @Component({
@@ -137,6 +138,11 @@ private submitPayload(boardImage: string, userInfo: any) {
                   if (attemptResult.isFirstAttempt) {
                     console.log(`First attempt - score awarded: ${attemptResult.scoreAwarded} points`);
                     console.log(`Dynamic score based on ${attemptResult.questionStats.successfulAttempts} successful and ${attemptResult.questionStats.unsuccessfulAttempts} unsuccessful attempts (${attemptResult.questionStats.successRate}% success rate)`);
+                    
+                    // Update leaderboard if user scored points
+                    if (attemptResult.scoreAwarded > 0) {
+                      this.scoreService.updateLeaderboard();
+                    }
                   } else {
                     console.log('Retry attempt - no score awarded');
                   }
@@ -236,7 +242,8 @@ exportLatexCall(boardImage: string) {
     private wb: NgWhiteboardService,
     private questionService: QuestionService,
     private route: ActivatedRoute,
-    private googleAuth: GoogleAuth
+    private googleAuth: GoogleAuth,
+    private scoreService: ScoreService
   ) {}
 
   ngOnInit(): void {
