@@ -38,7 +38,7 @@ export class Login implements OnInit {
   async subscribeWithStripe() {
     try {
       // Call backend to create a Stripe Checkout session
-      const resp: any = await this.http.post(`${environment.apiEndpoint}/api/create-subscription-checkout`, {}, { withCredentials: true }).toPromise();
+      const resp: any = await this.http.post(`${environment.apiEndpoint}/api/auth/create-subscription-checkout`, {}, { withCredentials: true }).toPromise();
       const stripe = await this.stripePromise;
       if (stripe && resp.sessionId) {
         await stripe.redirectToCheckout({ sessionId: resp.sessionId });

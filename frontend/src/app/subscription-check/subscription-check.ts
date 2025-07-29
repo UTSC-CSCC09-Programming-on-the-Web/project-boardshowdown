@@ -40,7 +40,7 @@ export class SubscriptionCheckComponent implements OnInit {
   }
 
   async subscribeWithStripe() {
-    const resp: any = await this.http.post('/api/create-subscription-checkout', {}, { withCredentials: true }).toPromise();
+    const resp: any = await this.http.post('/api/auth/create-subscription-checkout', {}, { withCredentials: true }).toPromise();
     const { loadStripe } = await import('@stripe/stripe-js');
     const stripe = await loadStripe('pk_test_51RmTseRfn0SZAA4wfzjIHyEbLtHc0tx0cFhWaJZQHnHqEj9Ff4M4Z1IfTRPgqN90r9rv5kHRTo06B6SrRAhj5wqk00MSaJARsc');
     if (stripe && resp.sessionId) {

@@ -69,7 +69,7 @@ export class WhiteboardComponent implements OnInit, OnChanges {
     this.googleAuth.getUserInfo().subscribe({
       next: (userInfo) => {
         console.log('Current user info:', userInfo);
-        
+
         setTimeout(() => {
           this.loading = true;
           if (!this.lastSvgBase64) {
@@ -138,7 +138,7 @@ private submitPayload(boardImage: string, userInfo: any) {
                   if (attemptResult.isFirstAttempt) {
                     console.log(`First attempt - score awarded: ${attemptResult.scoreAwarded} points`);
                     console.log(`Dynamic score based on ${attemptResult.questionStats.successfulAttempts} successful and ${attemptResult.questionStats.unsuccessfulAttempts} unsuccessful attempts (${attemptResult.questionStats.successRate}% success rate)`);
-                    
+
                     // Update leaderboard if user scored points
                     if (attemptResult.scoreAwarded > 0) {
                       this.scoreService.updateLeaderboard();
@@ -182,7 +182,7 @@ exportLatex() {
 }
 
 exportLatexCall(boardImage: string) {
-  fetch(`${environment.apiEndpoint}/analyze-svg`, {
+  fetch(`${environment.apiEndpoint}/api/openai/analyze-svg`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ base64: boardImage }),

@@ -17,10 +17,10 @@ export class GoogleAuth {
   }
 
   logout(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/logout`, { withCredentials: true });
+    return this.http.get(`${this.apiUrl}/auth/logout`, { withCredentials: true });
   }
 
   getUserInfo(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/me`, { withCredentials: true });
+    return this.http.get(`${this.apiUrl}/auth/me`, { withCredentials: true });
   }
 }
