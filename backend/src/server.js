@@ -333,7 +333,7 @@ app.get('/oauth2callback', async (req, res) => {
     let subscriptionStatus = 'inactive';
 
     if (user.stripe_customer_id) {
-      console.log('💳 Checking Stripe subscription status for customer:', user.stripe_customer_id);
+      console.log('Checking Stripe subscription status for customer:', user.stripe_customer_id);
 
       try {
         // Get active subscriptions for this customer
@@ -374,7 +374,7 @@ app.get('/oauth2callback', async (req, res) => {
             limit: 5
           });
 
-          console.log('� All subscriptions for customer:', allSubscriptions.data.map(sub => ({
+          console.log('All subscriptions for customer:', allSubscriptions.data.map(sub => ({
             id: sub.id,
             status: sub.status,
             created: new Date(sub.created * 1000)

@@ -11,6 +11,7 @@ import { HeaderComponent } from '../header/header.component';
   standalone: true,
   imports: [FormsModule, CommonModule, RoomLeaderboardComponent, HeaderComponent],
   templateUrl: './room.select.component.html',
+  styleUrls: ['./room.select.component.css']
 })
 export class RoomSelectComponent {
   rooms: string[] = ['whiteboardd-room', 'room-2', 'room-3'];
@@ -21,8 +22,9 @@ export class RoomSelectComponent {
 
   constructor(private router: Router, public scoreService: ScoreService) {}
 
-  toggleMode() {
-    this.mode = this.mode === 'create' ? 'search' : 'create';
+  setMode(mode: 'search' | 'create') {
+    this.mode = mode;
+    // Clear inputs when switching modes for better UX
     this.newRoom = '';
     this.searchTerm = '';
   }
@@ -55,6 +57,7 @@ export class RoomSelectComponent {
   openLeaderboard() {
     this.showLeaderboard = true;
   }
+  
   closeLeaderboard = () => {
     this.showLeaderboard = false;
   };
