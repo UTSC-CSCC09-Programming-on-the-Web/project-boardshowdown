@@ -273,8 +273,8 @@ exportLatexCall(boardImage: string) {
   }
 
   // canvas & style settings
-  canvasWidth        = 800;
-  canvasHeight       = 800;
+  canvasWidth        = 8000;
+  canvasHeight       = 8000;
   fullScreen         = false;
   strokeColor        = '#333333';
   backgroundColor    = '#F8F9FA';
