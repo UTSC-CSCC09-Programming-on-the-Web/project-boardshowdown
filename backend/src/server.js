@@ -343,7 +343,7 @@ app.get('/oauth2callback', async (req, res) => {
           limit: 1
         });
 
-        console.log('� Stripe subscriptions found:', subscriptions.data.length);
+        console.log('Stripe subscriptions found:', subscriptions.data.length);
 
         if (subscriptions.data.length > 0) {
           const subscription = subscriptions.data[0];
@@ -865,18 +865,62 @@ app.post('/check-solution-ai', async (req, res) => {
   }
 });
 
+///////////// ROOM MANAGEMENT ENDPOINTS /////////////
+
+// Auto-join room when user navigates to whiteboard
+app.post('/api/auto-join-room', async (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+
+  const { roomId } = req.body;
+  const userId = req.session.user.id;
+
+  if (!roomId) {
+    return res.status(400).json({ error: 'Room ID is required' });
+  }
+
+  try {
+    const { roomParticipantsQuery } = await import('../queries/roomParticipantsQuery.js');
+    
+    // Join the room
+    await client.query(roomParticipantsQuery.joinRoom, [userId, roomId]);
+    
+    // Get updated participant list
+    const participants = await client.query(roomParticipantsQuery.getActiveParticipants, [roomId]);
+    
+    console.log(`User ${userId} (${req.session.user.username}) auto-joined room ${roomId}`);
+    
+    res.json({ 
+      success: true, 
+      participants: participants.rows,
+      count: participants.rows.length
+    });
+  } catch (error) {
+    console.error('Error auto-joining room:', error);
+    res.status(500).json({ error: 'Failed to join room' });
+  }
+});
+
 ////////////////// Database Stuff ////////////////////
 import { questionBankRouter } from "../routers/questionBankRouter.js";
 import { userRouter } from "../routers/userRouter.js";
+import { roomRouter } from "../routers/roomRouter.js";
 import { initializeDatabase } from "../utils/dbInit.js";
+import { roomCleanupService } from "../services/roomCleanupService.js";
 
 // Initialize database
 initializeDatabase()
-  .then(() => console.log("Database initialized successfully"))
+  .then(() => {
+    console.log("Database initialized successfully");
+    // Start room cleanup service after database is ready
+    roomCleanupService.start();
+  })
   .catch((err) => console.error("Database initialization failed:", err));
 
 app.use("/api/question-bank", questionBankRouter);
 app.use("/api/users", userRouter);
+app.use("/api/rooms", roomRouter);
 
 // TODO: modularize this STRIPE API integration + Open AI
 

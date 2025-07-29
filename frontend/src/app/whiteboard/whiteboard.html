@@ -1,6 +1,24 @@
 <!-- src/app/app.component.html -->
 <!-- overlay shows whenever `loading` is true -->
 <app-header></app-header>
+
+<!-- Room Info Bar -->
+<div class="bg-blue-50 border-b border-blue-200 px-4 py-2 flex items-center justify-between">
+  <div class="flex items-center space-x-4">
+    <div class="flex items-center space-x-2">
+      <span class="text-blue-600">🏠</span>
+      <span class="font-medium text-blue-800">Room: {{ yjsRoom }}</span>
+    </div>
+    <div class="flex items-center space-x-2">
+      <span class="text-green-600">👥</span>
+      <span class="text-sm text-gray-600">{{ participantCount }} participant{{ participantCount !== 1 ? 's' : '' }} online</span>
+    </div>
+  </div>
+  <div class="text-xs text-gray-500">
+    Real-time collaboration active
+  </div>
+</div>
+
 <div
   *ngIf="loading"
   id="pageLoadingOverlay"

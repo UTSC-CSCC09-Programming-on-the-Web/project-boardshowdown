@@ -2,6 +2,8 @@ import { client } from "../datasource.js";
 import { createUserTableQuery } from "../models/users.js";
 import { createQuestionBankquery } from "../models/questionBank.js";
 import { createAttemptTable } from "../models/attempt.js";
+import { createRoomParticipantsTable, createRoomParticipantsIndexes } from "../models/roomParticipants.js";
+import { createRoomsTable, createRoomsIndexes } from "../models/rooms.js";
 
 export async function initializeDatabase() {
   try {
@@ -26,6 +28,22 @@ export async function initializeDatabase() {
     // Create Attempts table
     await client.query(createAttemptTable);
     console.log("Attempts table created/verified");
+
+    // Create Room Participants table
+    await client.query(createRoomParticipantsTable);
+    console.log("Room participants table created/verified");
+
+    // Create indexes for room participants
+    await client.query(createRoomParticipantsIndexes);
+    console.log("Room participants indexes created/verified");
+
+    // Create Rooms table
+    await client.query(createRoomsTable);
+    console.log("Rooms table created/verified");
+
+    // Create indexes for rooms
+    await client.query(createRoomsIndexes);
+    console.log("Rooms indexes created/verified");
 
     // Check if questions table has data
     const questionsCount = await client.query("SELECT COUNT(*) FROM Questions");
