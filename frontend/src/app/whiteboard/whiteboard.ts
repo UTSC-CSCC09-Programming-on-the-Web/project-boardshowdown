@@ -16,8 +16,9 @@ import {
 import * as Y from 'yjs';
 import { environment } from '../../environments/environment';
 import { WebsocketProvider } from 'y-websocket';
-import { QuestionService, Question, CheckSolutionResult } from '../services/question.service';
+import { QuestionService, Question, CheckSolutionResult, AttemptResult } from '../services/question.service';
 import { HeaderComponent } from '../header/header.component';
+import { GoogleAuth } from '../google-auth';
 
 //deploy 10x
 @Component({
@@ -63,19 +64,30 @@ export class WhiteboardComponent implements OnInit, OnChanges {
       return;
     }
 
-    setTimeout(() => {
-      this.loading = true;
-      if (!this.lastSvgBase64) {
-        console.error('Board export failed');
+    // Current user received from google auth
+    this.googleAuth.getUserInfo().subscribe({
+      next: (userInfo) => {
+        console.log('Current user info:', userInfo);
+        
+        setTimeout(() => {
+          this.loading = true;
+          if (!this.lastSvgBase64) {
+            console.error('Board export failed');
+            this.loading = false;
+            return;
+          }
+          // sleep for 5 seconds
+          // before submitting the answer
+
+          this.submitPayload(this.lastSvgBase64, userInfo);
+
+        }, 5);
+      },
+      error: (error) => {
+        console.error('Failed to get user info:', error);
         this.loading = false;
-        return;
       }
-      // sleep for 5 seconds
-      // before submitting the answer
-
-      this.submitPayload(this.lastSvgBase64);
-
-    }, 5);
+    });
 
     console.log('Submitting answer for question ID:', this.currentQuestion.id);
   }
@@ -84,8 +96,9 @@ onSave(svgBase64: string) {
   this.lastSvgBase64 = svgBase64;
 }
 
-private submitPayload(boardImage: string) {
+private submitPayload(boardImage: string, userInfo: any) {
     console.log('Submitting board image:', boardImage);
+    console.log('User info:', userInfo);
 
     if (!this.currentQuestion) {
       console.error('No question selected');
@@ -111,6 +124,28 @@ private submitPayload(boardImage: string) {
             message,
             correctAnswer: data.expected.toString(),
           };
+
+          // Create attempt record with user info
+          if (userInfo && userInfo.id && this.currentQuestion) {
+            this.questionService
+              .createAttempt(userInfo.id, this.currentQuestion.id, isCorrect)
+              .subscribe({
+                next: (attemptResult: AttemptResult) => {
+                  console.log('Attempt record created:', attemptResult);
+                  console.log(`Question difficulty: ${attemptResult.questionDifficulty}`);
+                  console.log(`Question stats:`, attemptResult.questionStats);
+                  if (attemptResult.isFirstAttempt) {
+                    console.log(`First attempt - score awarded: ${attemptResult.scoreAwarded} points`);
+                    console.log(`Dynamic score based on ${attemptResult.questionStats.successfulAttempts} successful and ${attemptResult.questionStats.unsuccessfulAttempts} unsuccessful attempts (${attemptResult.questionStats.successRate}% success rate)`);
+                  } else {
+                    console.log('Retry attempt - no score awarded');
+                  }
+                },
+                error: (attemptError) => {
+                  console.error('Failed to create attempt record:', attemptError);
+                }
+              });
+          }
 
           this.openFeedbackModal(this.feedback);
         },
@@ -200,7 +235,8 @@ exportLatexCall(boardImage: string) {
   constructor(
     private wb: NgWhiteboardService,
     private questionService: QuestionService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private googleAuth: GoogleAuth
   ) {}
 
   ngOnInit(): void {
