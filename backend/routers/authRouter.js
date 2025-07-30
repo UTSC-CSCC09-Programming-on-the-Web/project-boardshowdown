@@ -7,6 +7,7 @@ import { client } from '../datasource.js';
 import Stripe from 'stripe';
 import { setSubscriptionActive, setSubscriptionPastDue, setSubscriptionCanceled } from '../queries/subscriptionQueries.js';
 import bodyParser from 'body-parser';
+import { requireAuthWithTokens } from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -345,10 +346,7 @@ router.get('/oauth2callback', async (req, res) => {
 //// STRIPE API Integration ////
 
 // ==== STRIPE SUBSCRIPTION CHECKOUT ====
-router.post('/create-subscription-checkout', async (req, res) => {
-  // ensure user is logged in
-  if (!req.session.tokens) return res.status(401).send('Login required');
-
+router.post('/create-subscription-checkout', requireAuthWithTokens, async (req, res) => {
   try {
     let user = null;
 

@@ -1,6 +1,7 @@
 import express from 'express';
 import { OpenAI } from 'openai';
 import { client } from '../datasource.js';
+import { requireAuth } from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -44,7 +45,7 @@ async function extractLatexFromSvg(base64) {
   return completion.choices[0].message.content.trim();
 }
 
-router.post('/check-solution-ai', async (req, res) => {
+router.post('/check-solution-ai', requireAuth, async (req, res) => {
   const { base64, questionId } = req.body;
   if (!base64 || !questionId) {
     return res.status(400).json({ error: 'Missing latex or questionId' });
@@ -119,7 +120,7 @@ router.post('/check-solution-ai', async (req, res) => {
   }
 });
 
-router.post('/analyze-svg', async (req, res) => {
+router.post('/analyze-svg', requireAuth, async (req, res) => {
   const { base64 } = req.body;
   if (!base64) return res.status(400).json({ error: 'Missing base64' });
 

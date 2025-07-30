@@ -1,11 +1,12 @@
 import express from 'express';
 import { client } from '../datasource.js';
+import { requireAuth } from '../middleware/auth.js';
 
 
 const router = express.Router();
 
 // Create attempt record
-router.post('/create-attempt', async (req, res) => {
+router.post('/create-attempt', requireAuth, async (req, res) => {
   const { userId, questionId, isCorrect } = req.body;
 
   if (!userId || !questionId || typeof isCorrect !== 'boolean') {
@@ -87,7 +88,7 @@ router.post('/create-attempt', async (req, res) => {
 });
 
 // Get leaderboard based on attempt scores
-router.get('/', async (req, res) => {
+router.get('/', requireAuth, async (req, res) => {
   try {
     // Get user scores by summing all their attempt scores
     const leaderboardResult = await client.query(`

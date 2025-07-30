@@ -1,10 +1,11 @@
 import { Router } from "express";
 import { client } from "../datasource.js";
 import { questionBankQuery } from "../queries/questionBankQuery.js";
+import { requireAuth } from "../middleware/auth.js";
 
 export const questionBankRouter = Router();
 // Get all questions from the question bank
-questionBankRouter.get("/", async (req, res) => {
+questionBankRouter.get("/", requireAuth, async (req, res) => {
   try {
     const result = await client.query(questionBankQuery.getQuestionBankQuery);
     res.json({
@@ -22,7 +23,7 @@ questionBankRouter.get("/", async (req, res) => {
 });
 
 // Get a random question from the question bank (MUST be before /:id route)
-questionBankRouter.get("/random", async (req, res) => {
+questionBankRouter.get("/random", requireAuth, async (req, res) => {
   try {
     const result = await client.query(questionBankQuery.getRandomQuestionQuery);
     if (result.rows.length === 0) {
@@ -45,7 +46,7 @@ questionBankRouter.get("/random", async (req, res) => {
 });
 
 // Get a specific question by ID
-questionBankRouter.get("/:id", async (req, res) => {
+questionBankRouter.get("/:id", requireAuth, async (req, res) => {
   try {
     const { id } = req.params;
     const result = await client.query(questionBankQuery.getQuestionByIdQuery, [id]);

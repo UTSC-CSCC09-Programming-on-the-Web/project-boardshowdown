@@ -2,16 +2,9 @@ import express from 'express';
 import { client } from '../datasource.js';
 import { roomParticipantsQuery } from '../queries/roomParticipantsQuery.js';
 import { roomsQuery } from '../queries/roomsQuery.js';
+import { requireAuth } from '../middleware/auth.js';
 
 const router = express.Router();
-
-// Middleware to check if user is authenticated
-const requireAuth = (req, res, next) => {
-  if (!req.session.user) {
-    return res.status(401).json({ error: 'Authentication required' });
-  }
-  next();
-};
 
 // Create a new room
 router.post('/create', requireAuth, async (req, res) => {
