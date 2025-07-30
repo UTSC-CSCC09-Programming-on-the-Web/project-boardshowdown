@@ -18,19 +18,6 @@ process.on("unhandledRejection", (reason, promise) => {
   console.error("⚠️ [Unhandled Rejection]", reason, "Promise:", promise);
 });
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-//deploy 9x
-const envFile =
-  process.env.NODE_ENV === 'production'
-    ? path.join(__dirname, '../../.env.production')
-    : path.join(__dirname, '../../.env');
-
-dotenv.config({ path: envFile, override: true });
-
-console.log('Environment Variables:', process)
-
-
 const app = express();
 const allowedOrigins = [
   'https://boardshowdown.com',
@@ -80,26 +67,35 @@ app.use(session({
   }));
 
 
-////////////// OPEN AI API Integration //////////////
 
 
 
+
+
+///////////// ROOM MANAGEMENT ENDPOINTS /////////////
 
 
 ////////////////// Database Stuff ////////////////////
 import { questionBankRouter } from "../routers/questionBankRouter.js";
+import { roomRouter } from "../routers/roomRouter.js";
 import { initializeDatabase } from "../utils/dbInit.js";
+import { roomCleanupService } from "../services/roomCleanupService.js";
 
 
 // Initialize database
 initializeDatabase()
-  .then(() => console.log("Database initialized successfully"))
+  .then(() => {
+    console.log("Database initialized successfully");
+    // Start room cleanup service after database is ready
+    roomCleanupService.start();
+  })
   .catch((err) => console.error("Database initialization failed:", err));
 
 app.use("/api/question-bank", questionBankRouter);
 app.use('/auth', authRouter);
 app.use('/api/openai', openaiRouter);
 app.use('/api/leaderboard', leaderboardRouter);
+app.use("/api/rooms", roomRouter);
 
 // TODO: modularize this STRIPE API integration + Open AI
 
