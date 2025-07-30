@@ -1,5 +1,13 @@
 # BoardShowdown
 
+## Deployed Link
+
+https://boardshowdown.com
+
+## Demo Link
+
+https://youtu.be/9YtkUJdufeU
+
 ## Project Overview
 **BoardShowdown** is a head-to-head, live, web-based app in which users solve quantitative/mathematical problems by collaboratively or competitively "whiteboarding" their solutions, having each user see the same mathematics problem (algebra, calculus, or finance‐based problem, for instance). Users write or draw out their step-by-step solution on the same digital canvas. Points are earned based on accuracy and speed; simultaneous connections mean users can compete one‐on‐one.
 
@@ -21,41 +29,41 @@ Later, **BoardShowdown** can be expanded outside of strictly quantitative mathem
 
 ## Tech Stack
 
-- **Database**: PostgreSQL + REST API  
-- **Backend**: Express.js  
-- **Frontend**: Angular, Tailwind CSS  
+- **Database**: PostgreSQL + REST API
+- **Backend**: Express.js
+- **Frontend**: Angular, Tailwind CSS
 
 ---
 
 ## Additional Requirements
 
-- **Docker**: Containerization and deployment  
-- **Stripe**: Subscription and payment handling  
+- **Docker**: Containerization and deployment
+- **Stripe**: Subscription and payment handling
 
 ---
 
 ## Milestones
 
 ### Alpha Version
-- Log In / Sign In  
-- Basic Single-Page Application (SPA) whiteboard features  
-- Questions Bank CRUD (Create, Read, Update, Delete)  
+- Log In / Sign In
+- Basic Single-Page Application (SPA) whiteboard features
+- Questions Bank CRUD (Create, Read, Update, Delete)
 
 ### Beta Version
-- Conversion of hand-drawn/typed notes into LaTeX (Notes → LaTeX)  
-- AI-powered feedback on submitted solutions  
-- Real-time sharing of the whiteboard between competing users  
+- Conversion of hand-drawn/typed notes into LaTeX (Notes → LaTeX)
+- AI-powered feedback on submitted solutions
+- Real-time sharing of the whiteboard between competing users
 
 ### Final Version
-- Subscription / Payment Management with Stripe  
-- Question Leaderboard (Rankings for users and individual questions)  
-- Deployment via Docker container  
+- Subscription / Payment Management with Stripe
+- Question Leaderboard (Rankings for users and individual questions)
+- Deployment via Docker container
 
 ---
 
 ## How to Get Started
 
-1. **Clone the repository**  
+1. **Clone the repository**
    ```bash
    git clone https://github.com/your-org/BoardShowdown.git
    cd BoardShowdown
@@ -64,11 +72,11 @@ Later, **BoardShowdown** can be expanded outside of strictly quantitative mathem
    npm install --legacy-peer-deps
    ng serve
 
-   cd backend 
+   cd backend
    npm install
-   cd src 
+   cd src
    node start.js
 
    cd yjs
-   npm install 
+   npm install
    node server.js
