@@ -22,12 +22,33 @@ export interface CheckSolutionResult {
   feedback: string;
 }
 
+export interface AttemptResult {
+  success: boolean;
+  attempt: {
+    id: number;
+    user_id: number;
+    question_id: number;
+    is_correct: boolean;
+    score: number;
+    created_at: string;
+  };
+  isFirstAttempt: boolean;
+  scoreAwarded: number;
+  questionDifficulty: number;
+  questionStats: {
+    totalAttempts: number;
+    successfulAttempts: number;
+    unsuccessfulAttempts: number;
+    successRate: number;
+  };
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class QuestionService {
   private apiUrl = `${environment.apiEndpoint}/api/question-bank`;
-  private apiUrl2 = `${environment.apiEndpoint}/check-solution-ai`;
+  private apiUrl2 = `${environment.apiEndpoint}/api/openai/check-solution-ai`;
 
   constructor(private http: HttpClient) {}
 
@@ -65,6 +86,14 @@ export class QuestionService {
     return this.http.post<CheckSolutionResult>(this.apiUrl2, {
       base64: boardImage,
       questionId
+    });
+  }
+
+  createAttempt(userId: number, questionId: number, isCorrect: boolean): Observable<AttemptResult> {
+    return this.http.post<AttemptResult>(`${environment.apiEndpoint}/api/leaderboard/create-attempt`, {
+      userId,
+      questionId,
+      isCorrect
     });
   }
 

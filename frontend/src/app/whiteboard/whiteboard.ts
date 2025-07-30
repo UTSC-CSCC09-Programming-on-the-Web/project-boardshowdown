@@ -1,8 +1,9 @@
 // src/app/app.component.ts
-import { Component, OnInit }             from '@angular/core';
+import { Component, OnInit, OnDestroy, Input, SimpleChanges, OnChanges } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { FormsModule }           from '@angular/forms';
 import { CommonModule }          from '@angular/common';
-import { HttpClientModule }      from '@angular/common/http';
+import { Subscription } from 'rxjs';
 import {
   NgWhiteboardComponent,
   NgWhiteboardService,
@@ -11,22 +12,31 @@ import {
   ToolType,
   FormatType,
   LineJoin,
-  LineCap,
-  ElementType
+  LineCap
 } from 'ng-whiteboard';
 import * as Y from 'yjs';
 import { environment } from '../../environments/environment';
 import { WebsocketProvider } from 'y-websocket';
-import { QuestionService, Question, CheckSolutionResult } from '../services/question.service';
+import { QuestionService, Question, CheckSolutionResult, AttemptResult } from '../services/question.service';
+import { HeaderComponent } from '../header/header.component';
+import { GoogleAuth } from '../google-auth';
+import { ScoreService } from '../services/leaderboard.service';
+import { RoomService, RoomParticipant } from '../services/room.service';
 
 //deploy 10x
 @Component({
   selector: 'app-whiteboard',
-  imports: [NgWhiteboardComponent, CommonModule, FormsModule, HttpClientModule],
+  standalone: true,
+  imports: [NgWhiteboardComponent, CommonModule, FormsModule, HeaderComponent],
   templateUrl: './whiteboard.html',
   styleUrls: ['./whiteboard.css']
 })
-export class WhiteboardComponent implements OnInit {
+export class WhiteboardComponent implements OnInit, OnDestroy, OnChanges {
+  @Input() yjsRoom: string = 'whiteboardd-room';
+
+  // Room participants
+  participants: RoomParticipant[] = [];
+  participantCount = 0;
 
    showFeedbackModal = false;
    loading = false;
@@ -61,19 +71,30 @@ export class WhiteboardComponent implements OnInit {
       return;
     }
 
-    setTimeout(() => {
-      this.loading = true;
-      if (!this.lastSvgBase64) {
-        console.error('Board export failed');
+    // Current user received from google auth
+    this.googleAuth.getUserInfo().subscribe({
+      next: (userInfo) => {
+        console.log('Current user info:', userInfo);
+
+        setTimeout(() => {
+          this.loading = true;
+          if (!this.lastSvgBase64) {
+            console.error('Board export failed');
+            this.loading = false;
+            return;
+          }
+          // sleep for 5 seconds
+          // before submitting the answer
+
+          this.submitPayload(this.lastSvgBase64, userInfo);
+
+        }, 5);
+      },
+      error: (error) => {
+        console.error('Failed to get user info:', error);
         this.loading = false;
-        return;
       }
-      // sleep for 5 seconds
-      // before submitting the answer
-
-      this.submitPayload(this.lastSvgBase64);
-
-    }, 5);
+    });
 
     console.log('Submitting answer for question ID:', this.currentQuestion.id);
   }
@@ -82,8 +103,9 @@ onSave(svgBase64: string) {
   this.lastSvgBase64 = svgBase64;
 }
 
-private submitPayload(boardImage: string) {
+private submitPayload(boardImage: string, userInfo: any) {
     console.log('Submitting board image:', boardImage);
+    console.log('User info:', userInfo);
 
     if (!this.currentQuestion) {
       console.error('No question selected');
@@ -109,6 +131,33 @@ private submitPayload(boardImage: string) {
             message,
             correctAnswer: data.expected.toString(),
           };
+
+          // Create attempt record with user info
+          if (userInfo && userInfo.id && this.currentQuestion) {
+            this.questionService
+              .createAttempt(userInfo.id, this.currentQuestion.id, isCorrect)
+              .subscribe({
+                next: (attemptResult: AttemptResult) => {
+                  console.log('Attempt record created:', attemptResult);
+                  console.log(`Question difficulty: ${attemptResult.questionDifficulty}`);
+                  console.log(`Question stats:`, attemptResult.questionStats);
+                  if (attemptResult.isFirstAttempt) {
+                    console.log(`First attempt - score awarded: ${attemptResult.scoreAwarded} points`);
+                    console.log(`Dynamic score based on ${attemptResult.questionStats.successfulAttempts} successful and ${attemptResult.questionStats.unsuccessfulAttempts} unsuccessful attempts (${attemptResult.questionStats.successRate}% success rate)`);
+
+                    // Update leaderboard if user scored points
+                    if (attemptResult.scoreAwarded > 0) {
+                      this.scoreService.updateLeaderboard();
+                    }
+                  } else {
+                    console.log('Retry attempt - no score awarded');
+                  }
+                },
+                error: (attemptError) => {
+                  console.error('Failed to create attempt record:', attemptError);
+                }
+              });
+          }
 
           this.openFeedbackModal(this.feedback);
         },
@@ -139,7 +188,7 @@ exportLatex() {
 }
 
 exportLatexCall(boardImage: string) {
-  fetch(`${environment.apiEndpoint}/analyze-svg`, {
+  fetch(`${environment.apiEndpoint}/api/openai/analyze-svg`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ base64: boardImage }),
@@ -192,12 +241,101 @@ exportLatexCall(boardImage: string) {
   questionError: string | null = null;
 
   private ydoc = new Y.Doc();
-  private provider = new WebsocketProvider(environment.yjsWebsocketUrl, 'whiteboardd-room', this.ydoc);
-  private yarray = this.ydoc.getArray<WhiteboardElement>('canvas');
+  private provider!: WebsocketProvider;
+  private yarray!: Y.Array<WhiteboardElement>;
+  private participantsSubscription?: Subscription;
+
+  constructor(
+    private wb: NgWhiteboardService,
+    private questionService: QuestionService,
+    private route: ActivatedRoute,
+    private googleAuth: GoogleAuth,
+    private scoreService: ScoreService,
+    private roomService: RoomService
+  ) {}
+
+  ngOnInit(): void {
+    this.yjsRoom = this.route.snapshot.paramMap.get('room') || 'whiteboardd-room';
+    this.initYjsProvider();
+    this.initRoomMonitoring();
+  }
+
+  ngOnDestroy(): void {
+    this.cleanupRoom();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['yjsRoom'] && !changes['yjsRoom'].firstChange) {
+      this.cleanupRoom();
+      this.initYjsProvider();
+      this.initRoomMonitoring();
+    }
+  }
+
+  private cleanupRoom() {
+    // Stop room monitoring
+    this.roomService.stopRoomMonitoring();
+    
+    // Unsubscribe from participants
+    if (this.participantsSubscription) {
+      this.participantsSubscription.unsubscribe();
+      this.participantsSubscription = undefined;
+    }
+    
+    // Cleanup YJS provider
+    if (this.provider) {
+      this.provider.disconnect();
+      this.provider.destroy();
+    }
+    
+    // Clear YJS document
+    if (this.ydoc) {
+      this.ydoc.destroy();
+    }
+    
+    console.log('Cleaned up room resources');
+  }
+
+  private initRoomMonitoring() {
+    // Start monitoring this room
+    this.roomService.startRoomMonitoring(this.yjsRoom);
+    
+    // Subscribe to participant updates for this specific room
+    this.participantsSubscription = this.roomService.participants$.subscribe(participants => {
+      this.participants = participants;
+      this.participantCount = participants.length;
+      console.log(`Room ${this.yjsRoom} now has ${this.participantCount} participants`);
+    });
+  }
+
+  private initYjsProvider() {
+    // Create new YJS document for this room
+    this.ydoc = new Y.Doc();
+    
+    // Create new WebSocket provider for this specific room
+    this.provider = new WebsocketProvider(
+      environment.yjsWebsocketUrl,
+      this.yjsRoom,
+      this.ydoc
+    );
+    
+    // Get the canvas array for this room's document
+    this.yarray = this.ydoc.getArray<WhiteboardElement>('canvas');
+    
+    // Observe changes to the canvas array
+    this.yarray.observe(() => {
+      this.data = this.yarray.toArray();
+    });
+    
+    // Initialize with existing data
+    this.data = this.yarray.toArray();
+    
+    console.log('Yjs provider initialized for room:', this.yjsRoom);
+  }
 
   // canvas & style settings
-  canvasWidth        = 800;
-  canvasHeight       = 800;
+  canvasWidth        = 8000;
+  canvasHeight       = 8000;
   fullScreen         = false;
   strokeColor        = '#333333';
   backgroundColor    = '#F8F9FA';
@@ -219,8 +357,6 @@ exportLatexCall(boardImage: string) {
   LineJoin = LineJoin;
   LineCap  = LineCap;
   FormatType = FormatType;
-
-  constructor(private wb: NgWhiteboardService, private questionService: QuestionService) {}
 
   setTool(tool: ToolType)     { this.selectedTool = tool; this.wb.setActiveTool(tool); }
   undo()                      { this.wb.undo(); }
@@ -287,17 +423,7 @@ exportLatexCall(boardImage: string) {
   onReady()                   { console.log('Whiteboard ready!'); }
 
 
-ngOnInit(): void {
-  //this.data = this.yarray.toArray();
-  this.yarray.observe(() => {
-  const elements = this.yarray.toArray();
-  this.data = elements;
-});
-
-
-}
-
-onDataChange(d: WhiteboardElement[]) {
+  onDataChange(d: WhiteboardElement[]) {
  this.overrideCanvasData(d)
 
 }
@@ -320,8 +446,5 @@ onDataChange(d: WhiteboardElement[]) {
   this.yarray.delete(0, this.yarray.length);
   this.yarray.push(newElements);
 }
-
-
-
 
 }

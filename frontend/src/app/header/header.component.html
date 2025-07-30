@@ -1,0 +1,41 @@
+<header class="bg-white border-b border-gray-200 px-4 py-3 flex justify-between items-center">
+  <div class="flex items-center gap-3">
+    <!-- Back button - only show on whiteboard pages -->
+    <button
+      *ngIf="isOnWhiteboardPage()"
+      (click)="goBackToDashboard()"
+      class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded text-sm font-medium transition flex items-center gap-2"
+      title="Back to Dashboard"
+    >
+      ← Back
+    </button>
+    <h1 class="text-xl font-semibold text-gray-800">Board Showdown</h1>
+    <!-- Show current room name if on whiteboard -->
+    <div *ngIf="isOnWhiteboardPage() && getCurrentRoomName()" class="flex items-center gap-2">
+      <span class="text-gray-400">|</span>
+      <div class="bg-blue-50 px-3 py-1 rounded-full border border-blue-200">
+        <span class="text-sm font-medium text-blue-700">🏠 {{ getCurrentRoomName() }}</span>
+      </div>
+    </div>
+  </div>
+  <div class="flex gap-2">
+    <button
+      (click)="openLeaderboard()"
+      class="bg-yellow-400 hover:bg-yellow-500 text-white px-4 py-2 rounded text-sm font-medium transition"
+    >
+      🏆 Leaderboard
+    </button>
+    <button
+      (click)="logout()"
+      class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded text-sm font-medium transition"
+    >
+      Sign Out
+    </button>
+  </div>
+</header>
+
+<app-room-leaderboard
+  *ngIf="showLeaderboard"
+  [leaders]="scoreService.getLeaders() | async"
+  [close]="closeLeaderboard"
+></app-room-leaderboard>

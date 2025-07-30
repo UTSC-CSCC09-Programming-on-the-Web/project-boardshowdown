@@ -1,0 +1,29 @@
+<div class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-40">
+    <div class="bg-white rounded p-4 w-full max-w-2xl relative">
+    <button (click)="close()" class="absolute top-2 right-2 text-gray-500 text-xl">&times;</button>
+    <h3 class="text-lg font-bold mb-3 text-center">Leaderboard</h3>
+    <ul *ngIf="leaders?.length" class="max-h-96 overflow-y-auto">
+        <li *ngFor="let leader of leaders; let i = index" class="flex items-center justify-between py-2 px-2 border-b last:border-b-0 hover:bg-gray-50">
+            <div class="flex items-center space-x-3">
+                <span class="text-lg font-bold text-gray-500 w-6">{{ i + 1 }}.</span>
+                <img *ngIf="leader.profilePicture" [src]="leader.profilePicture" [alt]="leader.name" class="w-8 h-8 rounded-full">
+                <div *ngIf="!leader.profilePicture" class="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-sm font-bold text-white">
+                    {{ leader.name.charAt(0).toUpperCase() }}
+                </div>
+                <div>
+                    <div class="font-semibold">{{ leader.name }}</div>
+                    <div class="text-xs text-gray-500">{{ '@' + leader.username }}</div>
+                </div>
+            </div>
+            <div class="text-right">
+                <div class="text-lg font-bold text-blue-600">{{ leader.score }}</div>
+                <div class="text-xs text-gray-500">{{ leader.correctAttempts }}/{{ leader.totalAttempts }} correct</div>
+            </div>
+        </li>
+    </ul>
+    <div *ngIf="!leaders || !leaders.length" class="text-gray-400 text-center mt-4 py-8">
+        <div class="text-xl">🏆</div>
+        <div>No leaders yet. Be the first to solve a question!</div>
+    </div>
+    </div>
+</div>

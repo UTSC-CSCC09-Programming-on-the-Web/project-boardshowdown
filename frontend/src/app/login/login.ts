@@ -1,11 +1,14 @@
-import { Component, signal, computed, OnInit, Output, EventEmitter } from '@angular/core';
-import { FormBuilder, Validators, ReactiveFormsModule, FormGroup, FormControl } from '@angular/forms';
+import { Component, signal, OnInit, Output, EventEmitter } from '@angular/core';
 import { GoogleAuth } from '../google-auth';
 import { CommonModule } from '@angular/common';
-import { HttpClientModule } from '@angular/common/http';
 import { Router } from '@angular/router';
-// Include user service for user profile management
 import { UserService } from '../services/user.service';
+import { HttpClientModule } from '@angular/common/http';
+// Stripe imports
+import { loadStripe } from '@stripe/stripe-js';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../environments/environment';
+import { ReactiveFormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-login',
@@ -14,146 +17,140 @@ import { UserService } from '../services/user.service';
   templateUrl: `./login.html`,
 })
 export class Login implements OnInit {
-  loginForm!: FormGroup<{
-    email: FormControl<string | null>;
-    password: FormControl<string | null>;
-  }>;
   loggedIn = false;
   userProfile: any = null;
-
   @Output() loginSuccess = new EventEmitter<void>();
 
-  isSignUpMode = signal(false);
+
   loading = signal(false);
-
-  constructor(
-    private fb: FormBuilder,
-    public auth: GoogleAuth,
-    private userService: UserService
-  ) {}
-
-  ngOnInit(): void {
-    this.loginForm = this.fb.group({
-      email: ['', [Validators.required]],
-      password: ['', [Validators.required]],
-    });
-
-    this.auth.getUserInfo().subscribe({
-      next: () => this.loginSuccess.emit(),
-      error: () => {}
-    });
-  }
   error = signal('');
   success = signal(false);
 
-  isFormValid = computed(() => {
-    if (!this.loginForm) return false;
-    return this.loginForm.valid;
-  });
+  constructor(
+    public auth: GoogleAuth,
+    private userService: UserService,
+    private router: Router,
+    private http: HttpClient
+  ) {}
+  stripePromise = loadStripe('pk_test_51RmTseRfn0SZAA4wfzjIHyEbLtHc0tx0cFhWaJZQHnHqEj9Ff4M4Z1IfTRPgqN90r9rv5kHRTo06B6SrRAhj5wqk00MSaJARsc');
 
-  toggleMode() {
-    this.isSignUpMode.update(v => !v);
-    this.success.set(false);
-    this.error.set('');
-    this.loading.set(false);
-    this.loginForm.reset();
+  // Stripe subscription handler
+  async subscribeWithStripe() {
+    try {
+      // Call backend to create a Stripe Checkout session
+      const resp: any = await this.http.post(`${environment.apiEndpoint}/auth/create-subscription-checkout`, {}, { withCredentials: true }).toPromise();
+      const stripe = await this.stripePromise;
+      if (stripe && resp.sessionId) {
+        await stripe.redirectToCheckout({ sessionId: resp.sessionId });
+      } else {
+        this.error.set('Stripe session could not be created.');
+      }
+    } catch (err) {
+      this.error.set('Stripe checkout failed.');
+      console.error('Stripe checkout error:', err);
+    }
   }
 
-  // login using userService api
-  login() {
-    const { email, password } = this.loginForm.value;
+  ngOnInit(): void {
+    // Check if user is returning from successful payment
+    const urlParams = new URLSearchParams(window.location.search);
+    const sessionId = urlParams.get('session_id');
 
-    // Clear previous messages
-    this.error.set('');
-    this.success.set(false);
-
-    // Validate inputs
-    if (!email || !email.trim()) {
-      this.error.set('Email is required');
-      return;
-    }
-
-    if (!password || !password.trim()) {
-      this.error.set('Password is required');
-      return;
-    }
-
-    // Basic email format check
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email.trim())) {
-      this.error.set('Please enter a valid email address');
-      return;
-    }
-
-    this.loading.set(true);
-
-    if (this.isSignUpMode()) {
-      // Sign up mode - create new user
-      this.userService.createUser({ email: email.trim(), password }).subscribe({
-        next: (response) => {
-          this.loading.set(false);
-          if (response.success) {
-            this.success.set(true);
-            this.error.set('');
-            // Automatically sign in after successful signup
-            setTimeout(() => {
-              this.performSignIn(email.trim(), password);
-            }, 1000);
-          } else {
-            this.success.set(false);
-            this.error.set(response.error || 'Failed to create account');
-          }
-        },
-        error: (error) => {
-          this.loading.set(false);
-          this.success.set(false);
-          console.error('Signup error:', error);
-          if (error.error?.error) {
-            this.error.set(error.error.error);
-          } else {
-            this.error.set('Failed to create account. Please try again.');
-          }
-        }
-      });
+    if (sessionId) {
+      // User is returning from successful Stripe checkout
+      console.log('Returning from Stripe checkout with session:', sessionId);
+      this.error.set('Payment successful! Verifying subscription...');
+      // Wait a bit for webhook to process, then check authentication
+      setTimeout(() => {
+        this.checkUserAuthentication(true); // Pass flag indicating this is after payment
+      }, 3000); // Wait 3 seconds for webhook processing
     } else {
-      // Login mode
-      this.performSignIn(email.trim(), password);
+      // Normal authentication check
+      this.checkUserAuthentication(false);
     }
   }
 
-  private performSignIn(email: string, password: string) {
-    this.userService.signIn({ email, password }).subscribe({
-      next: (response) => {
+  private checkUserAuthentication(afterPayment: boolean = false, retryCount: number = 0): void {
+    this.loading.set(true);
+    this.auth.getUserInfo().subscribe({
+      next: (userInfo) => {
+        console.log('User info received:', userInfo);
+        this.userProfile = userInfo;
         this.loading.set(false);
-        if (response.success && response.data) {
+
+        // Check subscription status
+        if (userInfo.subscription_status !== 'active') {
+          console.log('User subscription not active');
+
+          // If this is after payment and subscription is still not active, retry a few times
+          if (afterPayment && retryCount < 3) {
+            console.log(`Retrying subscription check (${retryCount + 1}/3)...`);
+            this.error.set(`Verifying subscription... (${retryCount + 1}/3)`);
+            setTimeout(() => {
+              this.checkUserAuthentication(true, retryCount + 1);
+            }, 2000); // Wait 2 seconds between retries
+            return;
+          }
+
+          // If not after payment, or if retries exhausted, redirect to checkout
+          console.log('Redirecting to checkout');
+          this.error.set('Subscription required. Redirecting to checkout...');
+          setTimeout(() => {
+            this.subscribeWithStripe();
+          }, 1500);
+        } else {
+          // User has active subscription, proceed with login
+          console.log('User has active subscription');
           this.success.set(true);
           this.error.set('');
-          this.userProfile = response.data;
-          this.loggedIn = true;
-          this.loginSuccess.emit();
-        } else {
-          this.success.set(false);
-          this.error.set('Invalid email or password');
+
+
+          // Clean up URL if coming from payment success
+          if (afterPayment) {
+            window.history.replaceState({}, document.title, window.location.pathname);
+          }
+          this.router.navigate(['/dashboard']);
         }
       },
       error: (error) => {
+        console.error('Error getting user info:', error);
         this.loading.set(false);
-        this.success.set(false);
-        if (error.status === 401) {
-          this.error.set('Invalid email or password');
+
+        // If this is after payment and we get an auth error, might need to re-authenticate
+        if (afterPayment) {
+          this.error.set('Please log in again to complete your subscription activation.');
         } else {
-          this.error.set('Login failed. Please try again.');
+          // User is not authenticated, show login form
+          this.error.set('');
         }
       }
     });
   }
 
+
   loginWithGoogle() {
+    this.loading.set(true);
+    this.error.set('');
+    this.success.set(false);
     this.auth.login();
+
   }
 
   logoutGoogle() {
-    this.auth.logout();
+    this.loading.set(true);
+    this.auth.logout().subscribe({
+      next: (response) => {
+        console.log('Logout successful:', response);
+        this.logout();
+        this.loading.set(false);
+      },
+      error: (error) => {
+        console.error('Logout error:', error);
+        // Even if server logout fails, clear local state
+        this.logout();
+        this.loading.set(false);
+      }
+    });
   }
 
   logout() {
@@ -161,6 +158,6 @@ export class Login implements OnInit {
     this.userProfile = null;
     this.success.set(false);
     this.error.set('');
-    this.loginForm.reset();
+    this.loading.set(false);
   }
 }

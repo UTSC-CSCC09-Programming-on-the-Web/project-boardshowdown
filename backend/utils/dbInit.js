@@ -1,6 +1,9 @@
 import { client } from "../datasource.js";
 import { createUserTableQuery } from "../models/users.js";
 import { createQuestionBankquery } from "../models/questionBank.js";
+import { createAttemptTable } from "../models/attempt.js";
+import { createRoomParticipantsTable, createRoomParticipantsIndexes } from "../models/roomParticipants.js";
+import { createRoomsTable, createRoomsIndexes } from "../models/rooms.js";
 
 export async function initializeDatabase() {
   try {
@@ -13,6 +16,34 @@ export async function initializeDatabase() {
     // Create Questions table
     await client.query(createQuestionBankquery);
     console.log("Questions table created/verified");
+
+    // Add difficulty column if it doesn't exist (for existing databases)
+    try {
+      await client.query("ALTER TABLE Questions ADD COLUMN IF NOT EXISTS difficulty INTEGER NOT NULL DEFAULT 100");
+      console.log("Difficulty column added/verified");
+    } catch (error) {
+      console.log("Difficulty column already exists or error:", error.message);
+    }
+
+    // Create Attempts table
+    await client.query(createAttemptTable);
+    console.log("Attempts table created/verified");
+
+    // Create Room Participants table
+    await client.query(createRoomParticipantsTable);
+    console.log("Room participants table created/verified");
+
+    // Create indexes for room participants
+    await client.query(createRoomParticipantsIndexes);
+    console.log("Room participants indexes created/verified");
+
+    // Create Rooms table
+    await client.query(createRoomsTable);
+    console.log("Rooms table created/verified");
+
+    // Create indexes for rooms
+    await client.query(createRoomsIndexes);
+    console.log("Rooms indexes created/verified");
 
     // Check if questions table has data
     const questionsCount = await client.query("SELECT COUNT(*) FROM Questions");
@@ -36,51 +67,61 @@ async function insertSampleQuestions() {
   const sampleQuestions = [
     {
       question: "What is 2 + 2?",
-      solution: 4
+      solution: 4,
+      difficulty: 100
     },
     {
       question: "Calculate the derivative of x²",
-      solution: 0 // Placeholder for text solutions
+      solution: 0, // Placeholder for text solutions
+      difficulty: 100
     },
     {
       question: "If a stock costs $100 and increases by 5%, what is the new price?",
-      solution: 105
+      solution: 105,
+      difficulty: 100
     },
     {
       question: "What is the area of a circle with radius 3? (Use π ≈ 3.14)",
-      solution: 28.26
+      solution: 28.26,
+      difficulty: 100
     },
     {
       question: "Solve for x: 2x + 5 = 15",
-      solution: 5
+      solution: 5,
+      difficulty: 100
     },
     {
       question: "What is the compound interest on $1000 at 10% annual rate for 2 years?",
-      solution: 210
+      solution: 210,
+      difficulty: 100
     },
     {
       question: "Calculate: 7 × 8",
-      solution: 56
+      solution: 56,
+      difficulty: 100
     },
     {
       question: "What is the square root of 64?",
-      solution: 8
+      solution: 8,
+      difficulty: 100
     },
     {
       question: "If you invest $500 at 6% simple interest for 3 years, what is the total amount?",
-      solution: 590
+      solution: 590,
+      difficulty: 100
     },
     {
       question: "What is 25% of 80?",
-      solution: 20
+      solution: 20,
+      difficulty: 100
     }
   ];
 
   for (const q of sampleQuestions) {
     try {
       await client.query(
-        "INSERT INTO Questions (questions, solutions) VALUES ($1, $2)",
-        [q.question, q.solution]
+        "INSERT INTO Questions (questions, solutions, difficulty) VALUES ($1, $2, $3)",
+        [q.question, q.solution, q.difficulty]
       );
     } catch (error) {
       console.error(`Error inserting question: ${q.question}`, error);
