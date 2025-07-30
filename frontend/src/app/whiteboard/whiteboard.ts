@@ -23,7 +23,6 @@ import { GoogleAuth } from '../google-auth';
 import { ScoreService } from '../services/leaderboard.service';
 import { RoomService, RoomParticipant } from '../services/room.service';
 
-//deploy 10x
 @Component({
   selector: 'app-whiteboard',
   standalone: true,
@@ -283,31 +282,31 @@ exportLatexCall(boardImage: string) {
   private cleanupRoom() {
     // Stop room monitoring
     this.roomService.stopRoomMonitoring();
-    
+
     // Unsubscribe from participants
     if (this.participantsSubscription) {
       this.participantsSubscription.unsubscribe();
       this.participantsSubscription = undefined;
     }
-    
+
     // Cleanup YJS provider
     if (this.provider) {
       this.provider.disconnect();
       this.provider.destroy();
     }
-    
+
     // Clear YJS document
     if (this.ydoc) {
       this.ydoc.destroy();
     }
-    
+
     console.log('Cleaned up room resources');
   }
 
   private initRoomMonitoring() {
     // Start monitoring this room
     this.roomService.startRoomMonitoring(this.yjsRoom);
-    
+
     // Subscribe to participant updates for this specific room
     this.participantsSubscription = this.roomService.participants$.subscribe(participants => {
       this.participants = participants;
@@ -319,25 +318,25 @@ exportLatexCall(boardImage: string) {
   private initYjsProvider() {
     // Create new YJS document for this room
     this.ydoc = new Y.Doc();
-    
+
     // Create new WebSocket provider for this specific room
     this.provider = new WebsocketProvider(
       environment.yjsWebsocketUrl,
       this.yjsRoom,
       this.ydoc
     );
-    
+
     // Get the canvas array for this room's document
     this.yarray = this.ydoc.getArray<WhiteboardElement>('canvas');
-    
+
     // Observe changes to the canvas array
     this.yarray.observe(() => {
       this.data = this.yarray.toArray();
     });
-    
+
     // Initialize with existing data
     this.data = this.yarray.toArray();
-    
+
     console.log('Yjs provider initialized for room:', this.yjsRoom);
   }
 
