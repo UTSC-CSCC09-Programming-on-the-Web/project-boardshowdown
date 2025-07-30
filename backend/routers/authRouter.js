@@ -2,7 +2,6 @@ import express from 'express';
 import { google } from 'googleapis';
 import crypto from 'crypto';
 import url from 'url';
-import http from 'http';
 import https from 'https';
 import { client } from '../datasource.js';
 import Stripe from 'stripe';
@@ -270,7 +269,7 @@ router.get('/oauth2callback', async (req, res) => {
           limit: 1
         });
 
-        console.log('� Stripe subscriptions found:', subscriptions.data.length);
+        console.log('Stripe subscriptions found:', subscriptions.data.length);
 
         if (subscriptions.data.length > 0) {
           const subscription = subscriptions.data[0];
@@ -531,8 +530,5 @@ router.post(
     res.json({ received: true });
   }
 );
-
-
-// ...add any other routes as needed...
 
 export default router;

@@ -10,12 +10,12 @@ import authRouter from '../routers/authRouter.js';
 import openaiRouter from '../routers/openaiRouter.js';
 import leaderboardRouter from '../routers/leaderboardRouter.js';
 process.on("uncaughtException", (err) => {
-    console.error("🔥 [Uncaught Exception]", err);
+    console.error("[Uncaught Exception]", err);
 });
 
   // Unhandled promise rejections (async)
 process.on("unhandledRejection", (reason, promise) => {
-  console.error("⚠️ [Unhandled Rejection]", reason, "Promise:", promise);
+  console.error("[Unhandled Rejection]", reason, "Promise:", promise);
 });
 
 const app = express();
