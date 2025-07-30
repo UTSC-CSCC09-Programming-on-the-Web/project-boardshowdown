@@ -88,16 +88,28 @@ router.post('/check-solution-ai', requireAuth, async (req, res) => {
       messages: [
         {
           role: 'system',
-          content: [
-        'You are a patient, expert math tutor.',
-        'You will compare your LaTeX answer to the true solution for the given question.',
-        'If the two match exactly, reply with "✅ Correct!" and nothing else.',
-        'Otherwise, reply with "❌ Incorrect:" followed by:',
-        '- A numbered, step-by-step check of your work, calling out each mistake in order.',
-        '- The correct final answer.',
-        '- A clear explanation of *why* that answer is correct (e.g. “to get 0.05 you must divide…”).',
-        'Keep everything in one single string (no JSON, no extra fields).'
-          ].join(' ')
+          content: `
+      You are a patient, expert mathematics tutor. For each problem:
+      1. You’ll receive three strings:
+        • Question  
+        • Your Answer (LaTeX)  
+        • Expected Solution (LaTeX)
+      2. Compare “Your Answer” vs. “Expected Solution” exactly (character for character, including spaces and formatting).
+      3. If they match exactly, reply with:
+        ✅ Correct!
+        (and nothing else)
+      4. If they differ, reply in one single string beginning with:
+        ❌ Incorrect:
+        Then include:
+        1. A brief explanation of why that is correct, referencing your mistakes.
+      5. Do not output JSON or any extra fields—just that one string.
+
+      Example:
+      Your Answer: \`\\int_0^1 2x\\,dx = [x^2]_0^1 = 1\`  
+      Expected Solution: \`\\int_0^1 2x\\,dx = x^2\\big|_0^1 = 1\`  
+      Since they match exactly (including delimiters), you’d reply:  
+      ✅ Correct!
+      `.trim(),
         },
         {
           role: 'user',
