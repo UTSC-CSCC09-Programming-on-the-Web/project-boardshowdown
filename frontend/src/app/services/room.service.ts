@@ -26,23 +26,23 @@ export interface RoomStats {
   providedIn: 'root'
 })
 export class RoomService {
-  private apiUrl = '/api/rooms';
+  private apiUrl = `${environment.apiEndpoint}/api/rooms`;
   private currentRoom: string | null = null;
   private heartbeatInterval: any = null;
   private participantsInterval: any = null;
   private participantsSubject = new BehaviorSubject<RoomParticipant[]>([]);
-  
+
   public participants$ = this.participantsSubject.asObservable();
 
   constructor(private http: HttpClient) {}
 
   // Create a new room
   createRoom(roomId: string, name: string, description?: string, isPrivate: boolean = false): Observable<any> {
-    return this.http.post(`${this.apiUrl}/create`, { 
-      roomId, 
-      name, 
-      description, 
-      isPrivate 
+    return this.http.post(`${this.apiUrl}/create`, {
+      roomId,
+      name,
+      description,
+      isPrivate
     }, { withCredentials: true });
   }
 
@@ -95,12 +95,12 @@ export class RoomService {
   // Start monitoring a room (heartbeat + participant updates)
   startRoomMonitoring(roomId: string) {
     console.log(`Starting room monitoring for: ${roomId}`);
-    
+
     // Stop any existing monitoring first
     this.stopRoomMonitoring();
-    
+
     this.currentRoom = roomId;
-    
+
     // Auto-join the room first
     this.autoJoinRoom(roomId).subscribe({
       next: (response) => {
@@ -147,13 +147,13 @@ export class RoomService {
   stopRoomMonitoring() {
     if (this.currentRoom) {
       console.log(`Stopping room monitoring for: ${this.currentRoom}`);
-      
+
       // Leave the room
       this.leaveRoom(this.currentRoom).subscribe({
         next: () => console.log(`Left room ${this.currentRoom}`),
         error: (error) => console.error('Error leaving room:', error)
       });
-      
+
       this.currentRoom = null;
     }
 
