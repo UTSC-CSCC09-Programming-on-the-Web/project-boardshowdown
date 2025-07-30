@@ -4,7 +4,6 @@ import { client } from '../datasource.js';
 
 const router = express.Router();
 
-console.log(process.env); // Debugging line to check if the key is loaded
 const openai = new OpenAI({
   apiKey: process.env.OPEN_AI_KEY,
 });

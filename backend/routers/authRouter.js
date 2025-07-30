@@ -33,9 +33,8 @@ router.get('/google', async (req, res) => {
     // Generate a secure random state value.
     const state = crypto.randomBytes(32).toString('hex');
     // Store state in the session
-    console.log('HEREEE');
+    console.log('Starting OAuth flow');
     req.session.state = state;
-    console.log('Session state:', req.session.state);
 
     // Generate a url that asks permissions for the Drive activity and Google Calendar scope
     const authorizationUrl = oauth2Client.generateAuthUrl({
@@ -49,16 +48,12 @@ router.get('/google', async (req, res) => {
       // Include the state parameter to reduce the risk of CSRF attacks.
       state: state
     });
-    console.log('Authorization URL:', authorizationUrl);
-    console.log('REDIRECT_URI :', REDIRECT_URI);
     res.redirect(authorizationUrl);
   });
 
 router.get('/oauth2callback', async (req, res) => {
     // Handle the OAuth 2.0 server response
     let q = url.parse(req.url, true).query;
-    console.log("Q state:", q.state);
-    console.log("Session state:", req.session.state);
 
     if (q.error) { // An error response e.g. error=access_denied
       console.log('Error:' + q.error);
@@ -73,7 +68,6 @@ router.get('/oauth2callback', async (req, res) => {
         * ACTION ITEM: In a production app, you likely want to save the refresh token
         *              in a secure persistent database instead. */
       userCredential = tokens;
-      console.log('Tokens acquired:', tokens);
       req.session.tokens = tokens;
 
       const oauth2 = google.oauth2({
@@ -213,8 +207,7 @@ router.get('/oauth2callback', async (req, res) => {
 
   router.get('/me', async (req, res) => {
   console.log('/me endpoint called');
-  console.log('Session tokens present:', !!req.session.tokens);
-  console.log('Session user data present:', !!req.session.user);
+
 
   if (!req.session.tokens || !req.session.tokens.access_token) {
     console.log('User not authenticated - no session tokens');
