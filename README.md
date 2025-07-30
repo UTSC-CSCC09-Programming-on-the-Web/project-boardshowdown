@@ -59,3 +59,16 @@ Later, **BoardShowdown** can be expanded outside of strictly quantitative mathem
    ```bash
    git clone https://github.com/your-org/BoardShowdown.git
    cd BoardShowdown
+
+   cd frontend
+   npm install --legacy-peer-deps
+   ng serve
+
+   cd backend 
+   npm install
+   cd src 
+   node start.js
+
+   cd yjs
+   npm install 
+   node server.js
