@@ -68,6 +68,14 @@ export class WhiteboardComponent implements OnInit, OnDestroy, OnChanges {
 
     if (!this.currentQuestion) {
       console.error('No question selected');
+      // Optionally show an error message to the user
+      this.loading = false;
+      this.openFeedbackModal({
+        icon: '❌',
+        status: 'Error',
+        message: 'No question selected. Please select a question before submitting.',
+        correctAnswer: 'unknown'
+      });
       return;
     }
 
@@ -334,8 +342,8 @@ exportLatexCall(boardImage: string) {
   }
 
   // canvas & style settings
-  canvasWidth        = 8000;
-  canvasHeight       = 8000;
+  canvasWidth        = 900;
+  canvasHeight       = 850;
   fullScreen         = false;
   strokeColor        = '#333333';
   backgroundColor    = '#F8F9FA';
