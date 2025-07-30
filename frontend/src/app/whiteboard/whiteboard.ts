@@ -111,17 +111,11 @@ onSave(svgBase64: string) {
 }
 
 private submitPayload(boardImage: string, userInfo: any) {
-    console.log('Submitting board image:', boardImage);
-    console.log('User info:', userInfo);
 
     if (!this.currentQuestion) {
       console.error('No question selected');
       return;
     }
-
-    console.log('Checking solution for question ID:', this.currentQuestion.id);
-    // show spinner or initial modal state if you like
-    //this.openFeedbackModal(this.feedback);
 
     this.questionService
       .checkSolution(boardImage, this.currentQuestion.id)

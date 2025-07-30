@@ -54,7 +54,6 @@ router.post('/check-solution-ai', requireAuth, async (req, res) => {
   try {
     // run extractLatexFromSvg to ensure the LaTeX is valid
     const extractedLatex = await extractLatexFromSvg(base64);
-    console.log('Extracted LaTeX:', extractedLatex);
     // Convert questionId to integer
     const questionIdInt = parseInt(questionId, 10);
     if (isNaN(questionIdInt)) {
@@ -66,9 +65,6 @@ router.post('/check-solution-ai', requireAuth, async (req, res) => {
       return res.status(400).json({ error: 'Invalid LaTeX format' });
     }
 
-    // Log the received data
-    console.log('Received data:', { base64: extractedLatex, questionId: questionIdInt });
-
     // 1) load expected solution from DB
     const { rows } = await client.query(
       'SELECT questions, solutions FROM Questions WHERE id = $1',
@@ -79,8 +75,6 @@ router.post('/check-solution-ai', requireAuth, async (req, res) => {
     }
     const questionText = rows[0].questions;
     const expected = rows[0].solutions.toString();
-
-    console.log('Fetched expected solution from DB:', expected);
 
     // 2) ask OpenAI to compare and give feedback
     const aiResp = await openai.chat.completions.create({

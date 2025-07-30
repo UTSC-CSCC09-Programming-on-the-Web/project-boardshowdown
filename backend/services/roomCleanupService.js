@@ -47,7 +47,7 @@ class RoomCleanupService {
       );
       
       if (result.rows.length > 0) {
-        console.log(`🧹 Cleaned up ${result.rows.length} inactive participants:`);
+        console.log(`Cleaned up ${result.rows.length} inactive participants:`);
         result.rows.forEach(row => {
           console.log(`  - User ${row.user_id} removed from room ${row.room_id}`);
         });
@@ -81,9 +81,13 @@ export const roomCleanupService = new RoomCleanupService();
 process.on('SIGINT', () => {
   console.log('Shutting down room cleanup service...');
   roomCleanupService.stop();
+  // Exit after cleanup
+  process.exit(0);
 });
 
 process.on('SIGTERM', () => {
   console.log('Shutting down room cleanup service...');
   roomCleanupService.stop();
+  // Exit after cleanup
+  process.exit(0);
 });

@@ -176,7 +176,6 @@ router.get('/active', async (req, res) => {
   try {
     console.log('Getting all active rooms...');
     const rooms = await client.query(roomsQuery.getAllRoomsWithStats);
-    console.log('Query result:', rooms.rows);
 
     // If no rooms exist, return some default rooms for testing
     if (rooms.rows.length === 0) {
