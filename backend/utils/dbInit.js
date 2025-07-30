@@ -66,53 +66,78 @@ export async function initializeDatabase() {
 async function insertSampleQuestions() {
   const sampleQuestions = [
     {
-      question: "What is 2 + 2?",
-      solution: 4,
+      question: "Suppose you roll a fair 6‑sided die until you've seen all 6 face...n odd numbered face until you have seen all even numbered faces?",
+      solution: 0.05,
       difficulty: 100
     },
     {
-      question: "Calculate the derivative of x²",
-      solution: 0, // Placeholder for text solutions
+      question: "A baby is learning to walk with the assistance of its living r...ime, what proportion of the time would the baby be at the couch?",
+      solution: 0.333,
       difficulty: 100
     },
     {
-      question: "If a stock costs $100 and increases by 5%, what is the new price?",
-      solution: 105,
+      question: "Dan rolls a dice until he gets a 6. Given that he did not see a 5, what is the expected number of times Dan rolled his die?",
+      solution: 3,
       difficulty: 100
     },
     {
-      question: "What is the area of a circle with radius 3? (Use π ≈ 3.14)",
-      solution: 28.26,
+      question: "Assume you are given a stick that is 1 meter in length. Rando...s the probability that the smallest piece is at most 0.2 meter?",
+      solution: 0.84,
       difficulty: 100
     },
     {
-      question: "Solve for x: 2x + 5 = 15",
-      solution: 5,
+      question: "You roll two dice and select the one with the highest roll. What is the expected value of the die you selected?",
+      solution: 4.472,
       difficulty: 100
     },
     {
-      question: "What is the compound interest on $1000 at 10% annual rate for 2 years?",
-      solution: 210,
+      question: "We have 4 positive integers A, B, C, and D. We know AB = 16, BC = 14, and CD = 63. What is A + B + C + D?",
+      solution: 26,
       difficulty: 100
     },
     {
-      question: "Calculate: 7 × 8",
-      solution: 56,
+      question: "Suppose you flip a fair coin 1,000 times. What is the probability you observe an odd number of heads?",
+      solution: 0.5,
       difficulty: 100
     },
     {
-      question: "What is the square root of 64?",
-      solution: 8,
+      question: "Alice and Bob each have a coin and flip it until they get a h...ce, what is the expected number of times Alice flipped her coin?",
+      solution: 1.333,
       difficulty: 100
     },
     {
-      question: "If you invest $500 at 6% simple interest for 3 years, what is the total amount?",
-      solution: 590,
+      question: "An electronic safe has a three-digit code. You are given two ...fy these two requirements?",
+      solution: 120,
       difficulty: 100
     },
     {
-      question: "What is 25% of 80?",
-      solution: 20,
+      question: "There are five boxes: one with $150, the rest are empty. At a... that makes the game fair?",
+      solution: 50,
+      difficulty: 100
+    },
+    {
+      question: "You have a pet cat that has a sly tendency to leave your hou...our neighbor says it did so?",
+      solution: 0.009,
+      difficulty: 100
+    },
+    {
+      question: "You are playing a 2D game where your character is trapped in...ects at least one power-up?",
+      solution: 131,
+      difficulty: 100
+    },
+    {
+      question: "What is the expected number of cards you need to draw from a 52-card deck before you see the first ace?",
+      solution: 10.6,
+      difficulty: 100
+    },
+    {
+      question: "You roll a fair six-sided and sum the outcomes until you rea...hat is the expected number of times you expect to roll the die.",
+      solution: 6,
+      difficulty: 100
+    },
+    {
+      question: "Paul flips a fair coin until he obtains two consecutive head...nd the probability Paul flips the coin an even number of times.",
+      solution: 0.667,
       difficulty: 100
     }
   ];

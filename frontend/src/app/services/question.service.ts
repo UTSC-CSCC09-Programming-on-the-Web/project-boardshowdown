@@ -53,40 +53,40 @@ export class QuestionService {
   constructor(private http: HttpClient) {}
 
   getAllQuestions(): Observable<QuestionResponse> {
-    return this.http.get<QuestionResponse>(this.apiUrl);
+    return this.http.get<QuestionResponse>(this.apiUrl, { withCredentials: true });
   }
 
   getQuestionById(id: number): Observable<QuestionResponse> {
-    return this.http.get<QuestionResponse>(`${this.apiUrl}/${id}`);
+    return this.http.get<QuestionResponse>(`${this.apiUrl}/${id}`, { withCredentials: true });
   }
 
   getRandomQuestion(): Observable<QuestionResponse> {
-    return this.http.get<QuestionResponse>(`${this.apiUrl}/random`);
+    return this.http.get<QuestionResponse>(`${this.apiUrl}/random`, { withCredentials: true });
   }
 
   createQuestion(question: string, solution: number): Observable<QuestionResponse> {
     return this.http.post<QuestionResponse>(this.apiUrl, {
       questions: question,
       solutions: solution
-    });
+    }, { withCredentials: true });
   }
 
   updateQuestion(id: number, question: string, solution: number): Observable<QuestionResponse> {
     return this.http.put<QuestionResponse>(`${this.apiUrl}/${id}`, {
       questions: question,
       solutions: solution
-    });
+    }, { withCredentials: true });
   }
 
   deleteQuestion(id: number): Observable<QuestionResponse> {
-    return this.http.delete<QuestionResponse>(`${this.apiUrl}/${id}`);
+    return this.http.delete<QuestionResponse>(`${this.apiUrl}/${id}`, { withCredentials: true });
   }
 
   checkSolution(boardImage: string, questionId: number): Observable<CheckSolutionResult> {
     return this.http.post<CheckSolutionResult>(this.apiUrl2, {
       base64: boardImage,
       questionId
-    });
+    }, { withCredentials: true });
   }
 
   createAttempt(userId: number, questionId: number, isCorrect: boolean): Observable<AttemptResult> {
@@ -94,7 +94,7 @@ export class QuestionService {
       userId,
       questionId,
       isCorrect
-    });
+    }, { withCredentials: true });
   }
 
 }

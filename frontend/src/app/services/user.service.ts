@@ -71,27 +71,27 @@ export class UserService {
 
   // Get user profile by username
   getUserProfile(username: string): Observable<any> {
-    return this.http.get(`${this.apiUrl}/${username}`);
+    return this.http.get(`${this.apiUrl}/${username}`, { withCredentials: true });
   }
 
   // Get user profile by username
   getUserByUsername(username: string): Observable<ApiResponse<User>> {
-    return this.http.get<ApiResponse<User>>(`${this.apiUrl}/username/${username}`);
+    return this.http.get<ApiResponse<User>>(`${this.apiUrl}/username/${username}`, { withCredentials: true });
   }
 
   // Get user profile by email
   getUserByEmail(email: string): Observable<ApiResponse<User>> {
-    return this.http.get<ApiResponse<User>>(`${this.apiUrl}/email/${email}`);
+    return this.http.get<ApiResponse<User>>(`${this.apiUrl}/email/${email}`, { withCredentials: true });
   }
 
   // Update user profile
   updateUserProfile(username: string, userData: any): Observable<any> {
-    return this.http.put(`${this.apiUrl}/${username}`, userData);
+    return this.http.put(`${this.apiUrl}/${username}`, userData, { withCredentials: true });
   }
 
   // Delete user profile
   deleteUserProfile(username: string): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/${username}`);
+    return this.http.delete(`${this.apiUrl}/${username}`, { withCredentials: true });
   }
 
   // Sign out

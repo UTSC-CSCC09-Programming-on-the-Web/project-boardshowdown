@@ -32,7 +32,7 @@ export class ScoreService {
   }
 
   fetchLeaderboard(): Observable<LeaderboardResponse> {
-    return this.http.get<LeaderboardResponse>(this.apiUrl);
+    return this.http.get<LeaderboardResponse>(this.apiUrl, { withCredentials: true });
   }
 
   updateLeaderboard(): void {
