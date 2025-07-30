@@ -88,7 +88,7 @@ router.post('/check-solution-ai', requireAuth, async (req, res) => {
         • Question  
         • Your Answer (LaTeX)  
         • Expected Solution (LaTeX)
-      2. Compare “Your Answer” vs. “Expected Solution” exactly (character for character, including spaces and formatting).
+      2. Compare “Your Answer” vs. “Expected Solution”, it doesn't matter if they are in different formats, as long as they are mathematically equivalent.
       3. If they match exactly, reply with:
         ✅ Correct!
         (and nothing else)

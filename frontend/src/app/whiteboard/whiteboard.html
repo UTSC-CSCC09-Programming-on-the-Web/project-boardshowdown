@@ -61,7 +61,7 @@
         <!-- Current Question Display -->
         <div *ngIf="currentQuestion" class="mb-6 p-4 bg-white rounded-lg shadow-sm border-l-4 border-blue-500">
           <h3 class="font-semibold text-gray-800 mb-2">Current Question</h3>
-          <p class="text-gray-700 mb-3">{{ currentQuestion.questions }}</p>
+          <p class="text-gray-700 mb-3 leading-relaxed break-words">{{ currentQuestion.questions }}</p>
           <div class="text-sm text-gray-500">
             Question No. {{ currentQuestion.id }}
           </div>
@@ -107,10 +107,10 @@
             [class.ring-blue-500]="currentQuestion?.id === question.id"
             (click)="selectQuestion(question)"
           >
-            <div class="text-sm font-medium text-gray-800 mb-1">
+            <div class="text-sm font-medium text-gray-800 mb-2">
               Question {{ question.id }}
             </div>
-            <div class="text-sm text-gray-600 line-clamp-2">
+            <div class="text-sm text-gray-600 leading-relaxed break-words">
               {{ question.questions }}
             </div>
           </div>
