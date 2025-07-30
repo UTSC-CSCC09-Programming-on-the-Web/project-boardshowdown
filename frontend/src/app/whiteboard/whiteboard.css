@@ -1,9 +1,50 @@
-/* Question Sidebar Styles */
-.line-clamp-2 {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+/* Question Sidebar Styles - Force full text display */
+.question-text,
+.question-text * {
+  display: block !important;
+  overflow: visible !important;
+  white-space: normal !important;
+  word-wrap: break-word !important;
+  word-break: break-word !important;
+  line-height: 1.6 !important;
+  text-overflow: clip !important;
+  -webkit-line-clamp: unset !important;
+  line-clamp: unset !important;
+  -webkit-box-orient: unset !important;
+  max-height: none !important;
+  height: auto !important;
+  min-height: auto !important;
+}
+
+/* Override any potential Tailwind truncation classes */
+.question-text.truncate,
+.question-text .truncate {
+  overflow: visible !important;
+  text-overflow: clip !important;
+  white-space: normal !important;
+}
+
+/* Ensure parent containers don't constrain the text */
+.question-text:hover,
+.question-text:focus,
+.question-text:active {
+  overflow: visible !important;
+  white-space: normal !important;
+  text-overflow: clip !important;
+}
+
+/* Very specific override for production builds */
+div.question-text,
+p.question-text,
+span.question-text {
+  display: block !important;
+  overflow: visible !important;
+  white-space: normal !important;
+  text-overflow: clip !important;
+  -webkit-line-clamp: unset !important;
+  line-clamp: unset !important;
+  max-height: none !important;
+  height: auto !important;
 }
 
 /* Smooth transitions for sidebar */
