@@ -410,7 +410,7 @@ router.post('/create-subscription-checkout', async (req, res) => {
     payment_method_types: ['card'],
     customer: customerId,
     line_items: [{
-      price: 'price_1RmU1mRfn0SZAA4wh3QkNPSI',
+      price: process.env.STRIPE_PRICE_ID,
       quantity: 1,
     }],
     success_url: `${FRONTEND_URL}?session_id={CHECKOUT_SESSION_ID}&payment=success`,
